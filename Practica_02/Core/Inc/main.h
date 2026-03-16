@@ -30,6 +30,8 @@ extern "C" {
 #include "stm32f4xx_hal.h"
 #include <stdio.h> 	// Para compilar diferentes tipos de datos (Ejemplo: uint32_t)
 #include <stdbool.h>
+
+
 //#include "stm32f4xx_nucleo_144.h" 	/* <- BSP include */
 
 /* Private includes ----------------------------------------------------------*/
@@ -56,9 +58,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-void delayInit( delay_t * delay, tick_t duration );
-bool_t delayRead( delay_t * delay );
-void delayWrite( delay_t * delay, tick_t duration );
+
 
 /* USER CODE END EFP */
 
@@ -90,6 +90,10 @@ typedef struct{
    bool_t running;
 } delay_t;
 
+
+void delayInit( delay_t * delay, tick_t duration );
+bool_t delayRead( delay_t * delay );
+void delayWrite( delay_t * delay, tick_t duration );
 
 
 /* USER CODE END Private defines */

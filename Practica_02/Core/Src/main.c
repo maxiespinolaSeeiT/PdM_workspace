@@ -81,10 +81,10 @@ void delayWrite( delay_t * delay, tick_t duration ); //cambia el tiempo de durac
 			delay->startTime=HAL_GetTick();
 			delay->running=true;
 		}else{
-			if(HAL_GetTick()-delay->startTime)>=delay->duration){
+			if((HAL_GetTick()-delay->startTime)>=delay->duration){
 				t_Completo=true;
 				delay->running=false;
-				retun t_Completo;
+				return t_Completo;
 			}
 		}
 	}
@@ -116,8 +116,6 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  /* Initialize BSP Led for LED2 */
-    BSP_LED_Init(LED2);
 
   /* USER CODE END Init */
 
@@ -144,12 +142,12 @@ int main(void)
 	  //Punto 2
 	  delayInit(&delay_us,time_us);
 
-	  for(i=0;i<=(sizof(timeVector));i++){
-		  delayWrite(delay_us, timeVector[i]);
+	  for(i=0;i<=(sizeof(timeVector));i++){
+		  delayWrite(&delay_us, timeVector[i]);
 
 		  if(cont<6){
 			  if(delayRead(&delay_us)){
-				  BSP_LED_Toggle(LED2);
+				  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 			  cont++;
 			  }
 		  }
@@ -164,7 +162,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
-}
+
 
 /**
   * @brief System Clock Configuration
