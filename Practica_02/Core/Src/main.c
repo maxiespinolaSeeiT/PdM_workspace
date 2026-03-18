@@ -31,7 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+	#define vtime 3
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -45,9 +45,11 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 	delay_t delay_us; //se llama delay_us para no confundir con el delay usado dentro de las func.
 	tick_t time_us=100; //100 ms
-	tick_t timeVector[3]={1000,200,100};
-	aux cont=0;
+	tick_t timeVector[vtime]={1000,200,100};
+
 	aux i=0;
+	aux cantParpadeos=5;
+	aux cuentaCiclo=0;
 
 /* USER CODE END PV */
 
@@ -64,7 +66,6 @@ void delayWrite( delay_t * delay, tick_t duration ); //cambia el tiempo de durac
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 /*Variables*/
-	tick_t t_Actual=0;
 
 	//Punto 1.1
 	void delayInit( delay_t * delay, tick_t duration ){
@@ -86,7 +87,6 @@ void delayWrite( delay_t * delay, tick_t duration ); //cambia el tiempo de durac
 		}
 		return false;
 		}
-
 
 	//Punto 1.3
 	void delayWrite( delay_t * delay, tick_t duration ){
@@ -115,7 +115,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  delayInit(&delay_us,time_us);
+  delayInit(&delay_us,(timeVector[i]/2)); // divido por 2 porque cada toggle se hace a la mitad del período
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -140,21 +140,20 @@ int main(void)
 	  //cont=0;
 
 	  if(delayRead(&delay_us)){
-	  	 HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);}
+	  	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 
-	  /*for(i=0;i<=(sizeof(timeVector));i++){
-		  delayWrite(&delay_us, timeVector[i]);
+	  	cuentaCiclo++;
 
-		  if(cont<6){
-			  if(delayRead(&delay_us)){
-				  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-			  cont++;
-			  }
-		  }
-	  }*/
+	  	if(cuentaCiclo>=(cantParpadeos*2)){
+	  		cuentaCiclo=0;
+	  		i++;
+	  		if(i>=vtime){
+	  			i=0;
+	  		}
+	  	}
+	  	delayWrite(&delay_us, timeVector[i]/2);
 
-
-
+	  }
   }
 
 

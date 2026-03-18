@@ -83,6 +83,9 @@ typedef uint32_t tick_t;
 typedef bool bool_t;
 typedef uint8_t aux;
 
+#define parpadeo 5;
+
+
 
 typedef struct{
    tick_t startTime;
