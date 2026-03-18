@@ -66,8 +66,6 @@ void delayWrite( delay_t * delay, tick_t duration ); //cambia el tiempo de durac
 /*Variables*/
 	tick_t t_Actual=0;
 
-	bool_t t_Completo=false;
-
 	//Punto 1.1
 	void delayInit( delay_t * delay, tick_t duration ){
 		delay->duration=duration;
@@ -80,14 +78,15 @@ void delayWrite( delay_t * delay, tick_t duration ); //cambia el tiempo de durac
 		if(!delay->running){
 			delay->startTime=HAL_GetTick();
 			delay->running=true;
-		}else{
-			if((HAL_GetTick()-delay->startTime)>=delay->duration){
-				t_Completo=true;
-				delay->running=false;
-				return t_Completo;
-			}
+			return false;
 		}
-	}
+		if((HAL_GetTick()-delay->startTime)>=delay->duration){
+				delay->running=false;
+				return true;
+		}
+		return false;
+		}
+
 
 	//Punto 1.3
 	void delayWrite( delay_t * delay, tick_t duration ){
@@ -116,7 +115,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  delayInit(&delay_us,time_us);
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -135,14 +134,15 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
+ while (1)
   {
     /* USER CODE END WHILE */
-	  cont=0;
-	  //Punto 2
-	  delayInit(&delay_us,time_us);
+	  //cont=0;
 
-	  for(i=0;i<=(sizeof(timeVector));i++){
+	  if(delayRead(&delay_us)){
+	  	 HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);}
+
+	  /*for(i=0;i<=(sizeof(timeVector));i++){
 		  delayWrite(&delay_us, timeVector[i]);
 
 		  if(cont<6){
@@ -151,7 +151,7 @@ int main(void)
 			  cont++;
 			  }
 		  }
-	  }
+	  }*/
 
 
 
