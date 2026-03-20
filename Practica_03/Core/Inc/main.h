@@ -31,6 +31,9 @@ extern "C" {
 #include <stdint.h> 	// Para compilar diferentes tipos de datos (Ejemplo: uint32_t)
 #include <stdbool.h>
 
+
+//#include "stm32f4xx_nucleo_144.h" 	/* <- BSP include */
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -76,25 +79,11 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 
-typedef uint32_t tick_t;
-typedef bool bool_t;
-typedef uint8_t aux;
-
-#define parpadeo 5;
-
-
-
-typedef struct{
-   tick_t startTime;
-   tick_t duration;
-   bool_t running;
-} delay_t;
-
-
-void delayInit( delay_t * delay, tick_t duration );
-bool_t delayRead( delay_t * delay );
-void delayWrite( delay_t * delay, tick_t duration );
-
+//defino tiempos para el vector vectorTime
+#define MS_TICK 1 //Si necesito cambiar la escala de tiempo lo puedo hacer desde acá
+#define _100_MS (100*MS_TICK)
+#define _500_MS (500*MS_TICK)
+#define _1000_MS (1000*MS_TICK)
 
 /* USER CODE END Private defines */
 
