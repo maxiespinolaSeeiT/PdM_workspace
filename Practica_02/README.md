@@ -1,10 +1,10 @@
 # Programación de Microcontroladores
 
-###Especialización en Sistemas Embebidos
+Especialización en Sistemas Embebidos
 
 ---
 
-##Práctica 2 — Retardos No Bloqueantes
+Práctica 2 — Retardos No Bloqueantes
 
  **Consigna:**  
 https://docs.google.com/document/d/173_tBdN7rIAfT5S-5lSsJWCGIJHKG1ay3VvMh4yfM58/edit
@@ -18,6 +18,6 @@ Ingeniero Electrónico
 
 ---
 
-##Contacto
+Contacto
 
 maximiliano.espinola@gmail.com
