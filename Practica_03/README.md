@@ -1,10 +1,10 @@
 # Programación de Microcontroladores
 
-###Especialización en Sistemas Embebidos
+Especialización en Sistemas Embebidos
 
 ---
 
-##Práctica 3 — Módulos de software
+Práctica 3 — Módulos de software
 
 Objetivo:
 Implementar un módulo de software para trabajar con retardos no bloqueantes a partir de las funciones creadas en la práctica 2.
@@ -15,7 +15,7 @@ https://docs.google.com/document/d/173_tBdN7rIAfT5S-5lSsJWCGIJHKG1ay3VvMh4yfM58/
 
 ---
 
-## Autor
+Autor
 
 **Espínola Maximiliano Ariel**  
 Ingeniero Electrónico  
