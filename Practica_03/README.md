@@ -4,7 +4,7 @@ Especialización en Sistemas Embebidos
 
 ---
 
-Práctica 3 — Módulos de software
+**Práctica 3 — Módulos de software**
 
 Objetivo:
 Implementar un módulo de software para trabajar con retardos no bloqueantes a partir de las funciones creadas en la práctica 2.
@@ -22,6 +22,6 @@ Ingeniero Electrónico
 
 ---
 
-##Contacto
+Contacto
 
 maximiliano.espinola@gmail.com
