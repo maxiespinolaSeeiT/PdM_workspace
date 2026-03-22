@@ -15,6 +15,8 @@
 #include <stdbool.h>
 #include "stm32f4xx_hal.h"
 
+
+/* Public variables ------------------------------------------------------------------*/
 typedef uint32_t tick_t;
 typedef bool bool_t;
 typedef uint8_t aux;
@@ -24,12 +26,13 @@ typedef struct{
    tick_t duration;
    bool_t running;
 } delay_t;
+/* End public variables ------------------------------------------------------------------*/
 
-
+/* Public function ------------------------------------------------------------------*/
 void delayInit( delay_t * delay, tick_t duration );
 bool_t delayRead( delay_t * delay );
 void delayWrite( delay_t * delay, tick_t duration );
 bool_t delayIsRunning( delay_t* delay );
-
+/* End public function ------------------------------------------------------------------*/
 
 #endif /* API_INC_API_DELAY_H_ */
