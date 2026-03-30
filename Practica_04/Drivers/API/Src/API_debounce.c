@@ -49,7 +49,8 @@ void debounceFSM_init(){
 
 void debounceFSM_update(){
 
-	if (delayIsRunning(&delay_debounce)) return; //Si el delay está corriendo NO sigue
+	//if (delayIsRunning(&delay_debounce)) return; //Si el delay está corriendo NO sigue
+	if (!delayRead(&delay_debounce)) return;
 
 	switch (debounceFSMstate) {
 
