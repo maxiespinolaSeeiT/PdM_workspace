@@ -118,3 +118,17 @@ void uartImprimirConfig() //Imprime los valores de configuración de la UART hua
     uartSendString((uint8_t*)buffer);
 
 }
+
+bool_t uartReceiveByte(uint8_t *pstring)
+{
+    if (pstring == NULL) {
+        return false;
+    }
+
+    if (HAL_UART_Receive(&huart2, pstring, 1, 0) == HAL_OK) {
+        return true;   // llegó dato nuevo
+    }
+
+    return false;      // no llegó nada
+}
+

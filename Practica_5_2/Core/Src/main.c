@@ -94,12 +94,6 @@ int main(void)
   //MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  //Vector con mi base de tiempos para parpadeos
-
-
-  //delayInit(&delay_us, timeVector[0]);
-
-
   cmdParserInit();
 
 

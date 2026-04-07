@@ -32,4 +32,6 @@ void cmdParserInit(void);
 void cmdPoll(void);
 void cmdPrintHelp(void);
 
+static void cmdProcessLine(void);
+
 #endif /* API_INC_API_CMDPARSER_H_ */

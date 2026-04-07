@@ -22,5 +22,6 @@ void uartSendString(uint8_t * pstring);
 void uartSendStringSize(uint8_t * pstring, uint16_t size);
 void uartReceiveStringSize(uint8_t * pstring, uint16_t size);
 void uartImprimirConfig();
+bool_t uartReceiveByte(uint8_t *pstring); //funcion para ver si recibí o no algo
 
 #endif /* API_INC_API_UART_H_ */
