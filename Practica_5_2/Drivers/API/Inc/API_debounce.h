@@ -8,7 +8,7 @@
 #include "stm32f4xx_hal.h"
 #include <stdint.h> 	// Para compilar diferentes tipos de datos (Ejemplo: uint32_t)
 #include <stdbool.h>
-
+#include "API_delay.h"
 
 #ifndef API_INC_API_DEBOUNCE_H_
 #define API_INC_API_DEBOUNCE_H_
@@ -32,6 +32,8 @@ BUTTON_RISING,
 
 void buttonPressed();
 void buttonReleased();
+void boardLedOn();
+void boardLedOff();
 bool_t readKey();
 
 #endif /* API_INC_API_DEBOUNCE_H_ */

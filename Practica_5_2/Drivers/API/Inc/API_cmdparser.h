@@ -5,6 +5,11 @@
  *      Author: Maximiliano Ariel Espinola
  */
 
+#include <string.h>
+#include <ctype.h>
+#include "API_debounce.h"
+
+
 #ifndef API_INC_API_CMDPARSER_H_
 #define API_INC_API_CMDPARSER_H_
 
@@ -32,6 +37,6 @@ void cmdParserInit(void);
 void cmdPoll(void);
 void cmdPrintHelp(void);
 
-static void cmdProcessLine(void);
+
 
 #endif /* API_INC_API_CMDPARSER_H_ */

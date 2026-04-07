@@ -9,9 +9,17 @@
 #include "API_cmdparser.h"
 #include "API_uart.h"
 
+static void cmdProcessLine(void);
+static void strToUpper(char *str);
+
 static uint8_t cmdBuffer[CMD_MAX_LINE];
 static uint16_t cmdIndex = 0;
 static uint8_t caracterRecibido; //variable para ir guardando los caracteres que recibo
+
+static char *tokens[CMD_MAX_TOKENS];
+static uint8_t tokenCount = 0;
+static char *token;
+
 
 static cmd_status_t cmdStatus;
 static parserMEF_t state;
@@ -82,24 +90,117 @@ void cmdPoll(void)
 }
 
 void cmdPrintHelp(){
-	uartSendString((uint8_t*)"ESTOY EN IMPRIMIR HELP\r\n");
+	//uartSendString((uint8_t*)"ESTOY EN IMPRIMIR HELP\r\n");
+	uartSendString((uint8_t*)"\r\nComandos disponibles (case-INsensitive):\r\n");
+	uartSendString((uint8_t*)"HELP -> Muestra esta lista de ayuda\r\n");
+	uartSendString((uint8_t*)"LED ON -> Enciende el LD2 de la placa\r\n");
+	uartSendString((uint8_t*)"LED OFF -> Apaga el LD2 de la placa\r\n");
+	uartSendString((uint8_t*)"LED TOGGLE -> Cambia el estado del LD2 de la placa\r\n");
+	uartSendString((uint8_t*)"STATUS -> Muestra el estado del LED\r\n");
+	uartSendString((uint8_t*)"\r\n");
 }
 
-void cmdProcessLine(void)
+static void cmdProcessLine(void)
 {
-    cmdBuffer[cmdIndex] = '\0'; // cerrar string
+    cmdBuffer[cmdIndex] = '\0'; // pongo '\0' para cerrar el string
 
-    // ignorar comentarios
+    // ignora los comentarios
     if (cmdBuffer[0] == '#' ||
        (cmdBuffer[0] == '/' && cmdBuffer[1] == '/')) {
         cmdIndex = 0;
         return;
     }
 
+    //paso todo a mayuscula
+    strToUpper((char*)cmdBuffer);
+
     uartSendString((uint8_t*)"LINEA RECIBIDA: ");
     uartSendString(cmdBuffer); //muestro la linea recibida
     uartSendString((uint8_t*)"\r\n");
 
-    cmdIndex = 0; // reset buffer
+
+
+    //Hago los tokens con el buffer recibido
+    tokenCount = 0;
+	token = strtok((char*)cmdBuffer, " "); //corta el string usando el espacio " "
+
+	while (token != NULL && tokenCount < CMD_MAX_TOKENS) //verifico si hay palabras y que no se pase del limite
+	{
+		tokens[tokenCount++] = token; //formio el array con los tokens
+		token = strtok(NULL, " "); //voy al siguiente token
+	}
+
+	if (tokenCount == 0) return;
+
+	// Analizo el token "HELP"
+	if (strcmp(tokens[0], "HELP") == 0) //comparo los strings y devuelve 0 si son iguales
+	{
+		cmdPrintHelp();
+		return;
+	}
+
+	// Analizo el token "LED"
+	if (strcmp(tokens[0], "LED") == 0) //comparo los strings y devuelve 0 si son iguales
+	{
+		if (tokenCount < 2)
+		{
+			uartSendString((uint8_t*)"ERROR: ARG\r\n");
+			return;
+		}
+
+		if (strcmp(tokens[1], "ON") == 0)
+		{
+			boardLedOn(); //Enciendo el led con la funcion de la biblioteca  API_debounce
+			uartSendString((uint8_t*)"LED ON\r\n");
+		}
+		else if (strcmp(tokens[1], "OFF") == 0)
+		{
+			boardLedOff();//Apago el led con la funcion de la biblioteca  API_debounce
+			uartSendString((uint8_t*)"LED OFF\r\n");
+		}
+		else if (strcmp(tokens[1], "TOGGLE") == 0)
+		{
+			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+			uartSendString((uint8_t*)"LED TOGGLE\r\n");
+		}
+		else
+		{
+			uartSendString((uint8_t*)"ERROR: ARG\r\n");
+		}
+		return;
+	}
+
+	// Analizo el token "STATUS"
+	if (strcmp(tokens[0], "STATUS") == 0) //comparo los strings y devuelve 0 si son iguales
+	{
+		GPIO_PinState state = HAL_GPIO_ReadPin(LD2_GPIO_Port, LD2_Pin);
+
+		if (state == GPIO_PIN_SET)
+			uartSendString((uint8_t*)"LED is ON\r\n");
+		else
+			uartSendString((uint8_t*)"LED is OFF\r\n");
+
+		return;
+	}
+
+	// comando desconocido
+	uartSendString((uint8_t*)"ERROR: Comando desconocido\r\n");
+
+
+	cmdIndex = 0; // reset buffer
 }
 
+
+
+
+
+
+
+static void strToUpper(char *str) //Funcion para pasar todo a MAYUSCULA, con esto la hago case-insensitive
+{
+    while (*str)
+    {
+        *str = toupper((unsigned char)*str);
+        str++;
+    }
+}
