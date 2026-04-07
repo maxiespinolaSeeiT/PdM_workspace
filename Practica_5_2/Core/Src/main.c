@@ -20,6 +20,7 @@
 #include "main.h"
 #include "API_delay.h"
 #include "API_uart.h"
+#include "API_cmdparser.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -99,9 +100,7 @@ int main(void)
   //delayInit(&delay_us, timeVector[0]);
 
 
-  if(!uartInit()){
-	  return 0;
-  }
+  cmdParserInit();
 
 
   /* USER CODE END 2 */
@@ -112,7 +111,7 @@ int main(void)
  while (1)
   {
 
-
+	 cmdPoll();
   }
 
 
