@@ -19,13 +19,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "API_delay.h"
+#include "API_uart.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
-delay_t delay;  //variable para el parpadeo del led
-uint8_t toggle_delay = 0;
-const tick_t timeVector[] = {_100_MS, _500_MS};
 
 /* USER CODE END Includes */
 
@@ -45,13 +42,13 @@ const tick_t timeVector[] = {_100_MS, _500_MS};
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-UART_HandleTypeDef huart2;
+
 
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_USART2_UART_Init(void);
+//static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP Private Function Prototipe*/
 
 
@@ -93,7 +90,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART2_UART_Init();
+  //MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
   //Vector con mi base de tiempos para parpadeos
@@ -101,9 +98,13 @@ int main(void)
 
   //delayInit(&delay_us, timeVector[0]);
 
-  delayInit(&delay, timeVector[toggle_delay]);
-  debounceFSM_init();
 
+  if(!uartInit()){
+	  return 0;
+  }
+
+  uartSendString(buffer);
+  uartReceiveStringSize(buffer, 1000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -111,16 +112,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
  while (1)
   {
-	 debounceFSM_update();
 
-	 if(readKey()) { //Verifico que no este corriendo el parpadeo y esté presionada la tecla
-	 		toggle_delay ^= 1; /// realizamos una operacion XOR con 1 sobre toggle_delay para asegurarnos de que siempre cambie entre 0 y 1
-	 							//Linea 131 tomado de Martin Moya
-	 		delayWrite(&delay, timeVector[toggle_delay]);
-	 	}
-	 if(delayRead(&delay)) {
-	 		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	 	}
+
   }
 
 
@@ -182,33 +175,7 @@ void SystemClock_Config(void)
   * @param None
   * @retval None
   */
-static void MX_USART2_UART_Init(void)
-{
 
-  /* USER CODE BEGIN USART2_Init 0 */
-
-  /* USER CODE END USART2_Init 0 */
-
-  /* USER CODE BEGIN USART2_Init 1 */
-
-  /* USER CODE END USART2_Init 1 */
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
-  huart2.Init.WordLength = UART_WORDLENGTH_8B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART2_Init 2 */
-
-  /* USER CODE END USART2_Init 2 */
-
-}
 
 /**
   * @brief GPIO Initialization Function
@@ -257,6 +224,8 @@ static void MX_GPIO_Init(void)
   * @brief  This function is executed in case of error occurrence.
   * @retval None
   */
+
+
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
@@ -267,6 +236,8 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
+
+
 #ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
