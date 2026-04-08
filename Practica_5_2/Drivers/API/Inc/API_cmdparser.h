@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 #include "API_debounce.h"
 
 
@@ -24,19 +25,14 @@ typedef enum {
 	CMD_ERR_ARG
 } cmd_status_t;
 
-typedef enum {
-	CMD_IDLE,
-	CMD_RECEIVING,
-	CMD_PROCESS,
-	CMD_EXEC,
-	CMD_ERROR
-} parserMEF_t;
+
+
 /*----------Funciones Públicas------------------*/
 
 void cmdParserInit(void);
 void cmdPoll(void);
 void cmdPrintHelp(void);
 
-
+static const char* cmdStatusToString(cmd_status_t);
 
 #endif /* API_INC_API_CMDPARSER_H_ */

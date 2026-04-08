@@ -132,3 +132,49 @@ bool_t uartReceiveByte(uint8_t *pstring)
     return false;      // no llegó nada
 }
 
+
+//Funcion getter para consultar el baudrate configurado
+uint32_t consultaBaudrate(){
+
+	return huart2.Init.BaudRate;
+}
+
+//Funcion seter para configurar el baudrate
+bool_t uartSetBaudrate(uint32_t baudrate)
+{
+    if (baudrate < 9600 || baudrate > 921600)
+        return false;
+
+    // Desinicializar UART
+    if (HAL_UART_DeInit(&huart2) != HAL_OK)
+        return false;
+
+    // Cambiar baudrate
+    huart2.Init.BaudRate = baudrate;
+
+    // Reinicializar UART
+    if (HAL_UART_Init(&huart2) != HAL_OK)
+        return false;
+
+    return true;
+}
+
+//Funcion para limpiar el buffer de recepcion
+void uartFlush(void)
+{
+    __HAL_UART_CLEAR_OREFLAG(&huart2);
+    __HAL_UART_CLEAR_NEFLAG(&huart2);
+    __HAL_UART_CLEAR_FEFLAG(&huart2);
+    __HAL_UART_CLEAR_PEFLAG(&huart2);
+
+    uint8_t clear;
+
+    // vaciar FIFO RX (si hay datos colgados)
+    while (HAL_UART_Receive(&huart2, &clear, 1, 0) == HAL_OK);
+}
+
+bool_t esperarEnvio(){
+
+	while (__HAL_UART_GET_FLAG(&huart2, UART_FLAG_TC) == RESET);
+	return true;
+}
