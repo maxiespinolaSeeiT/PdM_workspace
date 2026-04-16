@@ -1,0 +1,20 @@
+/*
+ * ATH20_drivers.h
+ *
+ *  Created on: Apr 15, 2026
+ *      Author: Maximiliano Ariel Espinola
+ */
+
+#ifndef ATH20_INC_ATH20_DRIVER_H_
+#define ATH20_INC_ATH20_DRIVER_H_
+
+#include <stdint.h>
+#include <stdbool.h>
+
+typedef bool bool_t;
+
+bool_t ATH_Init(void); //Inicia el sensor
+bool_t ATH_Read(float *temperature, float *humidity); //Lee los datos del sensor
+
+
+#endif /* ATH20_INC_ATH20_DRIVER_H_ */

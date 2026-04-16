@@ -8,6 +8,7 @@
 
 #include "API_cmdparser.h"
 #include "API_uart.h"
+#include "MEF_main.h"
 
 typedef enum {
 	CMD_IDLE,
@@ -17,7 +18,7 @@ typedef enum {
 	CMD_ERROR
 } parserMEF_t;
 
-
+extern bool_t flag;
 
 static void cmdProcessLine(void);
 static void strToUpper(char *str);
@@ -39,7 +40,7 @@ static parserMEF_t state;
 
 
 void cmdParserInit(){
-	uartInit(); //inicio la UART
+	//uartInit(); //inicio la UART
 	state = CMD_IDLE; //Inicio la entrada de la MEF en CMD_IDLE
 }
 
@@ -242,6 +243,12 @@ static void cmdProcessLine(void)
 	    }
 
 	    return;
+	}
+
+	//Pregunto si manda TEMP?
+	if (strcmp(tokens[0], "TEMP?") == 0){
+		flag=true;
+		return;
 	}
 
 	// comando desconocido
