@@ -17,16 +17,15 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include <ATH20_driver.old>
 #include "main.h"
 
 
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "ATH20_driver.h"
 #include "I2C_port.h"
 #include "MEF_main.h"
-#include "API_cmdparser.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -105,7 +104,7 @@ int main(void)
   MEF_main_init();
   debounceFSM_init();
   cmdParserInit();
-  ATH_Init();
+  //ATH_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */

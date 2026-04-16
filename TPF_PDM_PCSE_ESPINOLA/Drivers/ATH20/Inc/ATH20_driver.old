@@ -5,8 +5,8 @@
  *      Author: Maximiliano Ariel Espinola
  */
 
-#ifndef ATH20_INC_ATH20_DRIVER_H_
-#define ATH20_INC_ATH20_DRIVER_H_
+#ifndef ATH20_INC_ATH20_DRIVER_OLD_
+#define ATH20_INC_ATH20_DRIVER_OLD_
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -17,4 +17,4 @@ bool_t ATH_Init(void); //Inicia el sensor
 bool_t ATH_Read(float *temperature, float *humidity); //Lee los datos del sensor
 
 
-#endif /* ATH20_INC_ATH20_DRIVER_H_ */
+#endif /* ATH20_INC_ATH20_DRIVER_OLD_ */

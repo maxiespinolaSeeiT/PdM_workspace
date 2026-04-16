@@ -8,7 +8,7 @@
  */
 
 
-#include <BMP280_driver.old>
+//#include <BMP280_driver.old>
 #include "MEF_main.h"
 #include <stdio.h>
 #include <stdint.h>
@@ -30,13 +30,27 @@ static MEF_main_state_t currentState = INIT;
 static bool stateInit = true;
 static bool_t keyP=false;
 
+static bool ath_done = false;
+static bool bmp_done = false;
+
 void MEF_main_init() {
     currentState = INIT;
     uartInit();
     debounceFSM_init();
     LCD_Init();
     //BMP280_Init();
-    ATH_Init2();
+
+    ATH_Init();
+    /*if (ATH_Init2())
+      {
+          uartSendString((uint8_t*)"ATH INIT OK\r\n");
+      }
+      else
+      {
+          uartSendString((uint8_t*)"ATH INIT ERROR\r\n");
+      }
+
+
     /*
     if (BMP280_Init())
     {
@@ -113,11 +127,28 @@ void MEF_main_update() {
         	        stateInit = false;
         	    }
 
-        	if (ATH_IsReady() && BMP280_IsReady()) //Espera que este la medición de los dos sensores
-        	    {
-        	        currentState = SHOW_T_P;
-        	        stateInit = true;
-        	    }
+
+
+        	if (ATH_IsReady())
+        	{
+        	    ath_done = true;
+        	    uartSendString((uint8_t*)"ATH READY\r\n");
+        	}
+
+        	if (BMP280_IsReady())
+        	{
+        	    bmp_done = true;
+        	    uartSendString((uint8_t*)"BMP READY\r\n");
+        	}
+
+        	if (ath_done && bmp_done)
+        	{
+        		uartSendString((uint8_t*)"LOS DOS READY\r\n");
+        	    currentState = SHOW_T_P;
+        	    stateInit = true;
+        	    ath_done = false;
+        	    bmp_done = false;
+        	}
 
         	    //currentState = SHOW_T_P;
         	   // stateInit = true;
@@ -217,4 +248,3 @@ void MEF_main_update() {
             break;
     }
 }
-

@@ -16,6 +16,7 @@ void ATH_Update(void);
 void ATH_Start(void);
 bool_t ATH_IsReady(void);
 bool_t ATH_GetData(float *temp, float *hum);
+uint8_t ATH_ReadStatus(void);
 
-bool_t ATH_Init2(void);
+void ATH_Init(void);
 #endif /* ATH20_INC_ATH20_MEF_DRIVER_H_ */

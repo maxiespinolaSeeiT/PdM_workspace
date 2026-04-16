@@ -7,6 +7,7 @@
 #include "ATH20_port.h"
 #include "ATH20_MEF_driver.h"
 #include "stdint.h"
+#include "API_uart.h"
 
 //Comandos del sensor
 #define CMD_INIT       0xBE // Inicializar
@@ -17,6 +18,11 @@ static uint8_t rx_buffer[7]; //Buffer para recibir los datos
 
 typedef enum {
     ATH_STATE_IDLE,
+
+    ATH_STATE_INIT_SEND,
+    ATH_STATE_INIT_WAIT,
+    ATH_STATE_INIT_CHECK,
+
     ATH_STATE_TRIGGER,
     ATH_STATE_WAIT,
     ATH_STATE_READ,
@@ -24,6 +30,8 @@ typedef enum {
     ATH_STATE_DONE,
     ATH_STATE_ERROR
 } ATH_State_t;
+
+
 
 uint8_t cmdInit1[3] = {CMD_INIT, 0x08, 0x00}; //Comando INIT y bytes de configuracion interna segun datasheet
 uint8_t cmdMeasure1[3] = {CMD_MEASURE, 0x33, 0x00}; //Comando que dispara la medición
@@ -33,6 +41,11 @@ uint32_t raw_temp1; //temperatura sin procesar
 
 static ATH_State_t state = ATH_STATE_IDLE;
 static uint32_t tick_start = 0;
+
+
+static uint32_t tick = 0;
+
+static bool_t initialized = false;
 
 static float temp_internal;
 static float hum_internal;
@@ -44,17 +57,48 @@ void ATH_Update(void)
         case ATH_STATE_IDLE:
             break;
 
-        case ATH_STATE_TRIGGER:
-            if (ATH_I2C_Write(cmdMeasure1, 3) == ATH_OK)
-            {
-                tick_start = HAL_GetTick(); // guardo tiempo
-                state = ATH_STATE_WAIT;
-            }
-            else
-            {
-                state = ATH_STATE_ERROR;
+        case ATH_STATE_INIT_SEND:
+        	ATH_I2C_Write(cmdInit1, 3);
+            tick = HAL_GetTick();
+            state = ATH_STATE_INIT_WAIT;
+            break;
+
+        case ATH_STATE_INIT_WAIT:
+            if (HAL_GetTick() - tick >= 10) { // tiempo datasheet
+                state = ATH_STATE_INIT_CHECK;
             }
             break;
+
+        case ATH_STATE_INIT_CHECK:
+        {
+            uint8_t status = ATH_ReadStatus();
+
+            if (status & 0x08) { // calibrado OK
+                initialized = true;
+                state = ATH_STATE_TRIGGER;
+            } else {
+                // reintento
+            	uartSendString((uint8_t*)"No se pudo inicializar el ATH20, reinicio...\r\n");
+                state = ATH_STATE_INIT_SEND;
+            }
+        }
+        break;
+
+        case ATH_STATE_TRIGGER:
+			if (!initialized) break;
+			if (ATH_I2C_Write(cmdMeasure1, 3) == ATH_OK)
+			{
+				tick_start = HAL_GetTick(); // guardo tiempo
+				state = ATH_STATE_WAIT;
+			}
+			else
+			{
+				state = ATH_STATE_ERROR;
+			}
+		break;
+
+
+
 
         case ATH_STATE_WAIT:
             if ((HAL_GetTick() - tick_start) >= 80)
@@ -116,6 +160,7 @@ bool_t ATH_IsReady(void)
 {
     if(state == ATH_STATE_DONE){
     	return true;
+    	state = ATH_STATE_IDLE;
     }else{
     	return false;
     }
@@ -134,15 +179,17 @@ bool_t ATH_GetData(float *temp, float *hum)
     return false;
 }
 
-bool_t ATH_Init2(void) {
-
-	ATH_Delay(40);//Asegura que espera 40ms una vez encendido
-
-    if (ATH_I2C_Write(cmdInit1, 3) != ATH_OK)
-        return false;
-
-    ATH_Delay(10);
-    return true;
+void ATH_Init(void) {
+	state=ATH_STATE_INIT_SEND;
 }
 
+uint8_t ATH_ReadStatus(void)
+{
+    uint8_t status = 0;
 
+    if (ATH_I2C_Read(&status, 1) != ATH_OK) {
+        return 0xFF; // error (opcional)
+    }
+
+    return status;
+}

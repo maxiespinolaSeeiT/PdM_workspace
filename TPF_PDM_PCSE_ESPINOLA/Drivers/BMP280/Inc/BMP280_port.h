@@ -14,8 +14,6 @@ typedef enum {
     BMP280_ERROR
 } bmp280_status_t;
 
-
-
 bmp280_status_t BMP280_ReadReg(uint8_t reg, uint8_t *data, uint16_t size);
 bmp280_status_t BMP280_WriteReg(uint8_t reg, uint8_t *data, uint16_t size);
 
