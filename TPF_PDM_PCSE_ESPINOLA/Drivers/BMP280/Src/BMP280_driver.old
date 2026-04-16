@@ -2,7 +2,7 @@
  * BMP280_driver.c
  *
  *  Created on: Apr 11, 2026
- *      Author: Usuario
+ *      Author: Maximiliano Ariel Espínola
  */
 #include "stdint.h"
 #include "BMP280_driver.h"
@@ -35,6 +35,7 @@ typedef struct {
 static BMP280_Calib_t calib;
 static int32_t t_fine;
 
+//Toma los datos de calibración del sensor
 static void BMP280_ReadCalibration(void)
 {
     uint8_t data[24];
@@ -59,10 +60,7 @@ bool_t BMP280_Init(void)
 {
     uint8_t ctrl   = 0x27; // temp x1, press x1, normal mode
     uint8_t config = 0xA0; // standby + filtro
-
     uint8_t id;
-
-
 
     // Configurar control (modo normal)
     if (BMP280_Write(REG_CTRL, &ctrl, 1) != BMP280_OK)
