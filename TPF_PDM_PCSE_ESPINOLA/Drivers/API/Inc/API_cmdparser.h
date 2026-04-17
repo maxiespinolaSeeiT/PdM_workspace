@@ -17,13 +17,15 @@
 #define CMD_MAX_LINE 64 //Incluye ´/0'
 #define CMD_MAX_TOKENS 3 // COMANDO+ máximo 2 argumentos
 
+//Lista de comandos
 typedef enum {
-	CMD_OK = 0,
-	CMD_ERR_OVERFLOW,
-	CMD_ERR_SYNTAX,
-	CMD_ERR_UNKNOWN,
-	CMD_ERR_ARG
-} cmd_status_t;
+    CMD_NONE = 0,
+    CMD_TEMP,
+    CMD_PRES,
+    CMD_HUM,
+    CMD_HELP,
+    CMD_MENU
+} cmd_t;
 
 
 
@@ -32,6 +34,10 @@ typedef enum {
 void cmdParserInit(void);
 void cmdPoll(void);
 void cmdPrintHelp(void);
+cmd_t cmdParser_GetCommand(void);
+
+/*----------Funciones Privadas------------------*/
+static void cmdPrintMenu(); //Imprime el menu en pantalla
 
 static const char* cmdStatusToString(cmd_status_t);
 

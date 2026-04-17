@@ -12,7 +12,7 @@ extern I2C_HandleTypeDef hi2c1;
 
 #define BMP280_ADDRESS (0x77 << 1) //  Direccion del BMP280
 
-bmp280_status_t BMP280_Write(uint8_t reg, uint8_t *data, uint16_t size)
+bmp280_status_t BMP280_WriteReg(uint8_t reg, uint8_t *data, uint16_t size)
 {
     uint8_t buffer[16];
 
@@ -26,18 +26,6 @@ bmp280_status_t BMP280_Write(uint8_t reg, uint8_t *data, uint16_t size)
 
     return BMP280_ERROR;
 }
-
-/*bmp280_status_t BMP280_ReadReg(uint8_t reg, uint8_t *data, uint16_t size)
-{
-    if (HAL_I2C_Master_Transmit(&hi2c1, BMP280_ADDRESS, &reg, 1, HAL_MAX_DELAY) != HAL_OK)
-        return BMP280_ERROR;
-
-    if (HAL_I2C_Master_Receive(&hi2c1, BMP280_ADDRESS, data, size, HAL_MAX_DELAY) != HAL_OK)
-        return BMP280_ERROR;
-
-    return BMP280_OK;
-}
-*/
 
 bmp280_status_t BMP280_ReadReg(uint8_t reg, uint8_t *data, uint16_t size)
 {

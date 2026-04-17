@@ -17,9 +17,11 @@
 typedef bool bool_t;
 
 //bool_t BMP280_ReadData(float *temperature, float  *pressure);
-bool_t BMP280_Task(float *temperature, float *pressure);
+//bool_t BMP280_Task(float *temperature, float *pressure);
+void BMP280_Update();
 bool_t BMP280_IsReady(void);
 bool_t BMP280_GetData(float *t, float *p);
+void BMP_Init();
 
 
 

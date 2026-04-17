@@ -6,26 +6,20 @@
  *  Created on: Apr 12, 2026
  *      Author: Maxmiliano Ariel Espinola
  */
-
-
-//#include <BMP280_driver.old>
 #include "MEF_main.h"
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include "API_debounce.h"
 #include "API_uart.h"
-//#include "ATH20_driver.h"
 #include "API_cmdparser.h"
 #include "ATH20_MEF_driver.h"
 #include "BMP280_MEF_driver.h"
 
-
 bool_t flag;
 float temp, hum;
-static float bmp_t, bmp_p;
+//static float bmp_t, bmp_p;
 
-// Estado actual
 static MEF_main_state_t currentState = INIT;
 static bool stateInit = true;
 static bool_t keyP=false;
@@ -33,47 +27,34 @@ static bool_t keyP=false;
 static bool ath_done = false;
 static bool bmp_done = false;
 
+cmd_t cmd = CMD_NONE;
+
+
+
+float t1, h1; //Temperatura y Humedad del ATH20
+float t2, p2; //Temperatura y Presion ATM del BMP280
+float tempAmbient=0.00f; //Variable para calcular el promedio entre las dos temperaturas del sensor
+
+char buffer_show[32];
 void MEF_main_init() {
     currentState = INIT;
     uartInit();
     debounceFSM_init();
     LCD_Init();
-    //BMP280_Init();
-
     ATH_Init();
-    /*if (ATH_Init2())
-      {
-          uartSendString((uint8_t*)"ATH INIT OK\r\n");
-      }
-      else
-      {
-          uartSendString((uint8_t*)"ATH INIT ERROR\r\n");
-      }
+    BMP_Init();
 
-
-    /*
-    if (BMP280_Init())
-    {
-        uartSendString((uint8_t*)"BMP INIT OK\r\n");
-    }
-    else
-    {
-        uartSendString((uint8_t*)"BMP INIT ERROR\r\n");
-    }
-    */
 }
 
 void MEF_main_update() {
 	debounceFSM_update();
 	cmdPoll();
 	ATH_Update();
+	BMP280_Update();
 	//keyP=readKey();
 	keyP=flag;
 
-
-
-	BMP280_Task(&bmp_t, &bmp_p);
-
+	//BMP280_Task(&bmp_t, &bmp_p);
 
 	switch (currentState) {
     case INIT:
@@ -92,16 +73,14 @@ void MEF_main_update() {
         	        stateInit = false;
         	    }
 
-				if (keyP) {
-					uartSendString((uint8_t*)"BOTON DETECTADO\r\n");
-				}
+        	cmd= cmdParser_GetCommand();
+        	if (cmd != CMD_NONE && cmd != CMD_MENU && cmd!=CMD_HELP)
+        	{
+        	    currentState = READ_SENSOR;
+        	    stateInit = true;
+        	}
 
-        	    if (keyP) {
-        	        currentState = READ_SENSOR;
-        	        stateInit = true;
-        	    }
-
-            break;
+        	break;
 
         case READ_SENSOR:
         	if (stateInit) {
@@ -110,6 +89,7 @@ void MEF_main_update() {
         	        uartSendString((uint8_t*)"STATE: READ_SENSOR\r\n");
         	        //ATH_Read(&temp, &hum);
         	        ATH_Start();
+        	        BMP_Start();
         	        stateInit = false;
         	    }
 
@@ -127,31 +107,23 @@ void MEF_main_update() {
         	        stateInit = false;
         	    }
 
-
-
         	if (ATH_IsReady())
         	{
         	    ath_done = true;
-        	    uartSendString((uint8_t*)"ATH READY\r\n");
         	}
 
         	if (BMP280_IsReady())
         	{
         	    bmp_done = true;
-        	    uartSendString((uint8_t*)"BMP READY\r\n");
         	}
 
         	if (ath_done && bmp_done)
         	{
-        		uartSendString((uint8_t*)"LOS DOS READY\r\n");
         	    currentState = SHOW_T_P;
         	    stateInit = true;
         	    ath_done = false;
         	    bmp_done = false;
         	}
-
-        	    //currentState = SHOW_T_P;
-        	   // stateInit = true;
 
             break;
 
@@ -160,55 +132,27 @@ void MEF_main_update() {
                 LCD_SetCursor(0, 0);
                 LCD_WriteString("SHOW_T_P");
 
-                /*Mostrar ATH20
-                char buffer[32];
-                if (ATH_Read(&temp, &hum)) {
+                if (cmd == CMD_TEMP)
+				{
+                	ATH_GetData(&t1, &h1);
+                	BMP280_GetData(&t2, &p2);
+                	tempAmbient=(t1+t2)/2.0f;
+                	sprintf(buffer_show, "Temperatura Ambiente: %.2f C \r\n", tempAmbient);
+                	uartSendString((uint8_t*)buffer_show);
+				}
 
-                        // Mostrar por UART
-                        sprintf(buffer, "ATH20 -> Temp: %.2f C | HumRel: %.2f %%\r\n", temp, hum);
-                        uartSendString((uint8_t*)buffer);
+                if (cmd == CMD_PRES)
+				{
+					BMP280_GetData(&t2, &p2);
 
-                        // Mostrar en LCD (16x2 típico)
-                        LCD_SetCursor(1, 0);
-                        sprintf(buffer, "T:%2.1fC H:%2.1f%%", temp, hum);
-                        LCD_WriteString(buffer);
+					sprintf(buffer_show, "Presión ATM: %.2f hPa\r\n", p2/100.0f);
+					uartSendString((uint8_t*)buffer_show);
+				}
 
-                    } else {
 
-                        uartSendString((uint8_t*)"Error lectura AHT20\r\n");
 
-                        LCD_SetCursor(1, 0);
-                        LCD_WriteString("Error sensor   ");
-                    }
 
-                //fin mostrar ath20
-
-                if (ATH_IsReady())
-                    {
-                        float t, h;
-                        char buffer[32];
-
-                        if (ATH_GetData(&t, &h))
-                        {
-                        	sprintf(buffer, "ATH20 -> Temp: %.2f C | HumRel: %.2f %%\r\n", t, h);
-                        	uartSendString((uint8_t*)buffer);
-                        }
-                    }
-
-                //mostrar BMP280
-                char buffer2[32];
-                sprintf(buffer2, "BMP280 -> Temp: %.2f C | PressAtm: %.2f hPa\r\n",
-                        bmp_t,
-                        bmp_p/100.0f);
-
-                uartSendString((uint8_t*)buffer2);
-
-                //fin mostrar BMP280*/
-
-                float t1, h1;
-                float t2, p2;
-                char buffer[32];
-                char buffer2[32];
+                /*
 
                 if (ATH_GetData(&t1, &h1) && BMP280_GetData(&t2, &p2))
                 {
@@ -219,7 +163,7 @@ void MEF_main_update() {
                     uartSendString((uint8_t*)buffer2);
                 }
 
-
+				*/
 
                 LCD_SetCursor(1, 0);
                 LCD_WriteString("T:--.-C P:----");

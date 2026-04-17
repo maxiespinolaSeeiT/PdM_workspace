@@ -33,10 +33,13 @@ typedef struct {
 } BMP280_Calib_t;
 
 static BMP280_Calib_t calib;
-static int32_t t_fine;
+//static int32_t t_fine;
 
 //Estados de la MEF BMP280
 typedef enum {
+	BMP_INIT_CONFIG,
+	BMP_INIT_CALIB,
+	BMP_INIT_DONE,
     BMP_IDLE,
     BMP_START,
     BMP_WAIT,
@@ -48,9 +51,10 @@ static bmp_state_t state = BMP_IDLE;
 static uint32_t tick_start;
 static uint8_t data[6];
 
-static float last_temp;
-static float last_press;
+static float temperature, last_temp;
+static float pressure, last_press;
 static bool_t data_ready = false;
+static bool_t initialized = false;
 
 
 //Toma los datos de calibración del sensor
@@ -74,32 +78,55 @@ static void BMP280_ReadCalibration(void)
     calib.dig_P9 = (data[23] << 8) | data[22];
 }
 
-bool_t BMP280_Task(float *temperature, float *pressure)
+void BMP280_Update()
 {
     uint8_t status;
 
     switch (state)
     {
         case BMP_IDLE:
-            state = BMP_START;
+
             break;
+
+        case BMP_INIT_CONFIG: // CONFIG
+		{
+			uint8_t ctrl = 0x25; //Mofo FORCED
+			uint8_t cfg  = 0xA0;
+
+			//BMP280_WriteReg(uint8_t reg, uint8_t *data, uint16_t size);
+
+
+			if (BMP280_WriteReg(REG_CTRL, &ctrl, 1) != BMP280_OK)
+				return false;
+
+			if (BMP280_WriteReg(REG_CONFIG, &cfg, 1) != BMP280_OK)
+				return false;
+
+			state = BMP_INIT_CALIB;
+			break;
+		}
+        case BMP_INIT_CALIB:
+        {
+        	BMP280_ReadCalibration();
+			state = BMP_INIT_DONE;
+			break;
+        }
+
+        case BMP_INIT_DONE:
+        {
+        	initialized = true;
+        	state = BMP_IDLE;
+        }
 
         case BMP_START:
         {
             uint8_t ctrl = 0x24; // FORCED MODE
-            if (BMP280_Write(REG_CTRL, &ctrl, 1) != BMP280_OK)
+            if (BMP280_WriteReg(REG_CTRL, &ctrl, 1) != BMP280_OK)
             {
                 state = BMP_IDLE;
                 return false;
             }
 
-            uint8_t cfg = 0xA0; // Config
-				if (BMP280_Write(REG_CTRL, &cfg, 1) != BMP280_OK)
-				{
-					state = BMP_IDLE;
-					return false;
-				}
-			BMP280_ReadCalibration();
             tick_start = HAL_GetTick();
             state = BMP_WAIT;
             break;
@@ -133,7 +160,7 @@ bool_t BMP280_Task(float *temperature, float *pressure)
             	                 ((float)calib.dig_T3);
 
             	    float t_fine_f = var1 + var2;
-            	    *temperature = t_fine_f / 5120.0f;
+            	    temperature = t_fine_f / 5120.0f;
 
             	    //Calculo la presión con la calibración
             	    float var1_p = (t_fine_f / 2.0f) - 64000.0f;
@@ -157,10 +184,10 @@ bool_t BMP280_Task(float *temperature, float *pressure)
 
             	    p = p + (var1_p + var2_p + ((float)calib.dig_P7)) / 16.0f;
 
-            	    *pressure = p;
+            	    pressure = p;
 
-            	    last_temp = *temperature;
-            	    last_press = *pressure;
+            	    last_temp = temperature;
+            	    last_press = pressure;
 
                 state = BMP_DONE;
             }
@@ -196,59 +223,16 @@ bool_t BMP280_GetData(float *t, float *p)
     return false;
 }
 
-
-
-
-/*
-
-
-
-
-bool_t BMP280_ReadData(float *temperature, float *pressure)
+//Controla que el estado esté en BMP_IDLE y el sensor inicializado
+void BMP_Start(void)
 {
-    uint8_t data[6];
-    char buffer[80];
+    if (state == BMP_IDLE && initialized)
+    {
+        state = BMP_START;
+    }
 
-    // Leo el dato
-    if (BMP280_ReadReg(REG_DATA, data, 6) != BMP280_OK)
-        return false;
+}
+void BMP_Init(){
+	state = BMP_INIT_CONFIG;
+}
 
-    // Armo el ADC con los 20bits que me envia el sensor
-    int32_t adc_P = (data[0] << 12) | (data[1] << 4) | (data[2] >> 4);
-    int32_t adc_T = (data[3] << 12) | (data[4] << 4) | (data[5] >> 4);
-
-    // Calculo la temperatura con la calibración
-    float var1 = (((float)adc_T) / 16384.0f - ((float)calib.dig_T1) / 1024.0f) * ((float)calib.dig_T2);
-    float var2 = ((((float)adc_T) / 131072.0f - ((float)calib.dig_T1) / 8192.0f) *
-                  (((float)adc_T) / 131072.0f - ((float)calib.dig_T1) / 8192.0f)) *
-                 ((float)calib.dig_T3);
-
-    float t_fine_f = var1 + var2;
-    *temperature = t_fine_f / 5120.0f;
-
-    //Calculo la presión con la calibración
-    float var1_p = (t_fine_f / 2.0f) - 64000.0f;
-    float var2_p = var1_p * var1_p * ((float)calib.dig_P6) / 32768.0f;
-    var2_p = var2_p + var1_p * ((float)calib.dig_P5) * 2.0f;
-    var2_p = (var2_p / 4.0f) + (((float)calib.dig_P4) * 65536.0f);
-
-    var1_p = (((float)calib.dig_P3) * var1_p * var1_p / 524288.0f +
-              ((float)calib.dig_P2) * var1_p) / 524288.0f;
-
-    var1_p = (1.0f + var1_p / 32768.0f) * ((float)calib.dig_P1);
-
-    if (var1_p == 0.0f)
-        return false;
-
-    float p = 1048576.0f - (float)adc_P;
-    p = (p - (var2_p / 4096.0f)) * 6250.0f / var1_p;
-
-    var1_p = ((float)calib.dig_P9) * p * p / 2147483648.0f;
-    var2_p = p * ((float)calib.dig_P8) / 32768.0f;
-
-    p = p + (var1_p + var2_p + ((float)calib.dig_P7)) / 16.0f;
-
-    *pressure = p;
-
-    return true;
-}*/

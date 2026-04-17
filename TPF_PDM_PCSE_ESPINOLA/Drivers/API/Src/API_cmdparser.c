@@ -19,6 +19,7 @@ typedef enum {
 } parserMEF_t;
 
 extern bool_t flag;
+static cmd_t currentCmd = CMD_NONE; //Variable para enviar el estado actual recibido por la UART
 
 static void cmdProcessLine(void);
 static void strToUpper(char *str);
@@ -26,16 +27,12 @@ static void strToUpper(char *str);
 static uint8_t cmdBuffer[CMD_MAX_LINE];
 static uint16_t cmdIndex = 0;
 static uint8_t caracterRecibido; //variable para ir guardando los caracteres que recibo
-static uint32_t baudrateconfig;
-static char bufferBaudrate[32]; //bufer para formatear el numero de baudrate
-
-
 static char *tokens[CMD_MAX_TOKENS];
 static uint8_t tokenCount = 0;
 static char *token;
 
 
-static cmd_status_t cmdStatus;
+
 static parserMEF_t state;
 
 
@@ -70,7 +67,6 @@ void cmdPoll(void)
     		{
 				if (cmdIndex >= CMD_MAX_LINE - 1) //me fijo si no hay overflow
 				{
-					cmdStatus = CMD_ERR_OVERFLOW;
 					state = CMD_ERROR;
 				}
 				else
@@ -93,7 +89,6 @@ void cmdPoll(void)
 
     case CMD_ERROR:
     	uartSendString((uint8_t*)"\r\nERROR: ");
-    	uartSendString((uint8_t*)cmdStatusToString(cmdStatus));
     	uartSendString((uint8_t*)"\r\n");
     	cmdIndex = 0;
     	state = CMD_IDLE;
@@ -108,12 +103,22 @@ void cmdPoll(void)
 
 void cmdPrintHelp(){
 	//uartSendString((uint8_t*)"ESTOY EN IMPRIMIR HELP\r\n");
-	uartSendString((uint8_t*)"\r\nComandos disponibles (case-INsensitive):\r\n");
-	uartSendString((uint8_t*)"HELP -> Muestra esta lista de ayuda\r\n");
-	uartSendString((uint8_t*)"LED ON -> Enciende el LD2 de la placa\r\n");
-	uartSendString((uint8_t*)"LED OFF -> Apaga el LD2 de la placa\r\n");
-	uartSendString((uint8_t*)"LED TOGGLE -> Cambia el estado del LD2 de la placa\r\n");
-	uartSendString((uint8_t*)"STATUS -> Muestra el estado del LED\r\n");
+	uartSendString((uint8_t*)"\r\nMENU AYUDA\r\n");
+	uartSendString((uint8_t*)"- Escriba el nombre de los comandos de la lista\r\n");
+	uartSendString((uint8_t*)"- No importa si están en maypuscula o minúscula\r\n");
+	uartSendString((uint8_t*)"- Si escribió mal un caracter, vuelva a ecribir\r\n");
+	uartSendString((uint8_t*)"\r\n");
+}
+
+static void cmdPrintMenu(){
+	//uartSendString((uint8_t*)"ESTOY EN IMPRIMIR HELP\r\n");
+	uartSendString((uint8_t*)"\r\nESTACIÓN METEOROLÓGICA:\r\n");
+	uartSendString((uint8_t*)"\r\nLista de comandos disponibles\r\n");
+	uartSendString((uint8_t*)"TEMP? -> Muestra teperatura actual\r\n");
+	uartSendString((uint8_t*)"PRES? -> Muestra la presión atmosférica en hPa\r\n");
+	uartSendString((uint8_t*)"HUM? -> Muestra la humedad relativa \r\n");
+	uartSendString((uint8_t*)"HELP? -> Ayuda\r\n");
+	uartSendString((uint8_t*)"MENU -> Vuelve a este menú\r\n");
 	uartSendString((uint8_t*)"\r\n");
 }
 
@@ -133,12 +138,6 @@ static void cmdProcessLine(void)
     //paso todo a mayuscula
     strToUpper((char*)cmdBuffer);
 
-    //uartSendString((uint8_t*)"LINEA RECIBIDA: ");
-    //uartSendString(cmdBuffer); //muestro la linea recibida
-    //uartSendString((uint8_t*)"\r\n");
-
-
-
     //Hago los tokens con el buffer recibido
 
     tokenCount = 0;
@@ -152,104 +151,37 @@ static void cmdProcessLine(void)
 
 	if (tokenCount == 0) return;
 
-	// Analizo el token "HELP"
-	if (strcmp(tokens[0], "HELP") == 0) //comparo los strings y devuelve 0 si son iguales
+	//Comando para mostrar la temperatura
+	if (strcmp(tokens[0], "TEMP?") == 0)
 	{
-		cmdPrintHelp();
+		currentCmd = CMD_TEMP;
+		return;
+	}
+	//Comando para mostrar la presion atm
+	if (strcmp(tokens[0], "PRES?") == 0)
+	{
+		currentCmd = CMD_PRES;
+		return;
+	}
+	// Comando para mostrar la humedad relativa
+	if (strcmp(tokens[0], "HUM?") == 0)
+	{
+		currentCmd = CMD_HUM;
+		return;
+	}
+	//Comando de ayuda
+	if (strcmp(tokens[0], "HELP?") == 0)
+	{
+		currentCmd = CMD_HELP;
+		return;
+	}
+	//Comando para imprimir el menú
+	if (strcmp(tokens[0], "MENU") == 0)
+	{
+		currentCmd = CMD_MENU;
 		return;
 	}
 
-	// Analizo el token "LED"
-	if (strcmp(tokens[0], "LED") == 0) //comparo los strings y devuelve 0 si son iguales
-	{
-		if (tokenCount < 2)
-		{
-			uartSendString((uint8_t*)"ERROR: ARG\r\n");
-			return;
-		}
-
-		if (strcmp(tokens[1], "ON") == 0)
-		{
-			boardLedOn(); //Enciendo el led con la funcion de la biblioteca  API_debounce
-			uartSendString((uint8_t*)"LED ON\r\n");
-		}
-		else if (strcmp(tokens[1], "OFF") == 0)
-		{
-			boardLedOff();//Apago el led con la funcion de la biblioteca  API_debounce
-			uartSendString((uint8_t*)"LED OFF\r\n");
-		}
-		else if (strcmp(tokens[1], "TOGGLE") == 0)
-		{
-			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-			uartSendString((uint8_t*)"LED TOGGLE\r\n");
-		}
-		else
-		{
-			uartSendString((uint8_t*)"ERROR: ARG\r\n");
-		}
-		return;
-	}
-
-	// Analizo el token "STATUS"
-	if (strcmp(tokens[0], "STATUS") == 0) //comparo los strings y devuelve 0 si son iguales
-	{
-		GPIO_PinState state = HAL_GPIO_ReadPin(LD2_GPIO_Port, LD2_Pin);
-
-		if (state == GPIO_PIN_SET)
-			uartSendString((uint8_t*)"LED is ON\r\n");
-		else
-			uartSendString((uint8_t*)"LED is OFF\r\n");
-
-		return;
-	}
-
-
-	//Analizo BAUD? para cambiar el baudrate
-	if (strcmp(tokens[0], "BAUD?") == 0) //comparo los strings y devuelve 0 si son iguales
-	{
-		baudrateconfig=consultaBaudrate();
-		sprintf(bufferBaudrate, "Baudrate: %lu\r\n", baudrateconfig);
-		uartSendString((uint8_t*)bufferBaudrate);
-		return;
-
-	}
-
-	// Busco el valor y seteo el baudrate
-	if (strncmp(tokens[0], "BAUD=", 5) == 0)
-	{
-		baudrateconfig = atoi(&tokens[0][5]); // toma lo que viene después de '='
-
-	    if (baudrateconfig < 9600 || baudrateconfig > 921600)
-	    {
-	        uartSendString((uint8_t*)"ERROR: Baudrate fuera de rango\r\n");
-	        return;
-	    }
-	    // Espero que termine de transmitir lo que tiene en el buffer
-	    esperarEnvio();
-
-	    if (uartSetBaudrate(baudrateconfig))
-	    {
-
-
-
-	    	uartFlush(); // Limpio el buffer
-	    	cmdIndex = 0; // limpia parser
-	        sprintf(bufferBaudrate, "Nuevo baudrate: %lu\r\n", baudrateconfig);
-	        uartSendString((uint8_t*)bufferBaudrate);
-	    }
-	    else
-	    {
-	        uartSendString((uint8_t*)"ERROR: No se pudo configurar UART\r\n");
-	    }
-
-	    return;
-	}
-
-	//Pregunto si manda TEMP?
-	if (strcmp(tokens[0], "TEMP?") == 0){
-		flag=true;
-		return;
-	}
 
 	// comando desconocido
 	uartSendString((uint8_t*)"ERROR: Comando desconocido\r\n");
@@ -258,13 +190,8 @@ static void cmdProcessLine(void)
 	cmdIndex = 0; // reset buffer
 }
 
-
-
-
-
-
-
-static void strToUpper(char *str) //Funcion para pasar todo a MAYUSCULA, con esto la hago case-insensitive
+//Funcion para hacer case-INsensitve la recepción del buffer
+static void strToUpper(char *str)
 {
     while (*str)
     {
@@ -273,15 +200,10 @@ static void strToUpper(char *str) //Funcion para pasar todo a MAYUSCULA, con est
     }
 }
 
-static const char* cmdStatusToString(cmd_status_t status)
+//GETER para obtener el comando recibido por la UART
+cmd_t cmdParser_GetCommand(void)
 {
-    switch (status)
-    {
-        case CMD_OK:            return "OK";
-        case CMD_ERR_OVERFLOW:  return "OVERFLOW";
-        case CMD_ERR_SYNTAX:    return "SYNTAX";
-        case CMD_ERR_UNKNOWN:   return "UNKNOWN";
-        case CMD_ERR_ARG:       return "ARG";
-        default:                return "INVALID";
-    }
+    cmd_t cmd = currentCmd;
+    currentCmd = CMD_NONE;
+    return cmd;
 }

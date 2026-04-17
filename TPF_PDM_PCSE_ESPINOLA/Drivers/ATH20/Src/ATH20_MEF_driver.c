@@ -15,6 +15,7 @@
 #define CMD_SOFTRESET  0xBA // Reset
 
 static uint8_t rx_buffer[7]; //Buffer para recibir los datos
+static uint8_t status; //Controla el estado leyendo el primer byte
 
 typedef enum {
     ATH_STATE_IDLE,
@@ -71,7 +72,7 @@ void ATH_Update(void)
 
         case ATH_STATE_INIT_CHECK:
         {
-            uint8_t status = ATH_ReadStatus();
+            status = ATH_ReadStatus();
 
             if (status & 0x08) { // calibrado OK
                 initialized = true;
@@ -183,12 +184,13 @@ void ATH_Init(void) {
 	state=ATH_STATE_INIT_SEND;
 }
 
+//Lee el primer byte del sensor para ver el estado
 uint8_t ATH_ReadStatus(void)
 {
     uint8_t status = 0;
 
     if (ATH_I2C_Read(&status, 1) != ATH_OK) {
-        return 0xFF; // error (opcional)
+        return 0xFF; // error
     }
 
     return status;
