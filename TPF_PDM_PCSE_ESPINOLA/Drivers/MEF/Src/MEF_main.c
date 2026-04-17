@@ -35,7 +35,9 @@ float t1, h1; //Temperatura y Humedad del ATH20
 float t2, p2; //Temperatura y Presion ATM del BMP280
 float tempAmbient=0.00f; //Variable para calcular el promedio entre las dos temperaturas del sensor
 
+
 char buffer_show[32];
+char buffer_lcd[16];
 void MEF_main_init() {
     currentState = INIT;
     uartInit();
@@ -58,21 +60,24 @@ void MEF_main_update() {
 
 	switch (currentState) {
     case INIT:
-                LCD_SetCursor(0, 0);
-                LCD_WriteString("STATE: INIT");
-                uartSendString((uint8_t*)"STATE: INIT\r\n");
+				if (stateInit) {
+				LCD_SetCursor(0, 0);
+				LCD_WriteString("ESTACION");
+				LCD_SetCursor(1, 0);
+				LCD_WriteString("METEOROLOGICA");
+				uartSendString((uint8_t*)"ESTACION METEOROLOGICA\r\n");
+				stateInit = false;
+				}
+
                 currentState = IDLE;
                 stateInit = true;
                 break;
 
         case IDLE:
         	if (stateInit) {
-        	        LCD_SetCursor(0, 0);
-        	        LCD_WriteString("STATE: IDLE");
-        	        uartSendString((uint8_t*)"STATE: IDLE\r\n");
-        	        stateInit = false;
-        	    }
-
+        		uartSendString((uint8_t*)"Ejecute un comando: \r\n");
+        		stateInit = false;
+        	}
         	cmd= cmdParser_GetCommand();
         	if (cmd != CMD_NONE && cmd != CMD_MENU && cmd!=CMD_HELP)
         	{
@@ -84,10 +89,6 @@ void MEF_main_update() {
 
         case READ_SENSOR:
         	if (stateInit) {
-        	        LCD_SetCursor(0, 0);
-        	        LCD_WriteString("READ_SENSOR");
-        	        uartSendString((uint8_t*)"STATE: READ_SENSOR\r\n");
-        	        //ATH_Read(&temp, &hum);
         	        ATH_Start();
         	        BMP_Start();
         	        stateInit = false;
@@ -99,13 +100,6 @@ void MEF_main_update() {
             break;
 
         case PROCESS_DATA:
-
-        	if (stateInit) {
-        	        LCD_SetCursor(0, 0);
-        	        LCD_WriteString("PROCESS_DATA");
-        	        uartSendString((uint8_t*)"STATE: PROCESS_DATA\r\n");
-        	        stateInit = false;
-        	    }
 
         	if (ATH_IsReady())
         	{
@@ -128,17 +122,23 @@ void MEF_main_update() {
             break;
 
         case SHOW_T_P:
-
-                LCD_SetCursor(0, 0);
-                LCD_WriteString("SHOW_T_P");
-
                 if (cmd == CMD_TEMP)
 				{
                 	ATH_GetData(&t1, &h1);
                 	BMP280_GetData(&t2, &p2);
-                	tempAmbient=(t1+t2)/2.0f;
-                	sprintf(buffer_show, "Temperatura Ambiente: %.2f C \r\n", tempAmbient);
+
+                	tempAmbient=(t1+t2)/2.0f; //Calculo el promedio de las temperaturas de los dos sensores
+
+
+                	sprintf(buffer_show, "Temperatura Ambiente: %.2f ºC \r\n", tempAmbient);
                 	uartSendString((uint8_t*)buffer_show);
+
+                	LCD_Clear();
+                	sprintf(buffer_lcd, "%.2f%cC%c", tempAmbient, 0xDF,'\0');
+                	LCD_SetCursor(0, 0);
+                	LCD_WriteString("Temp. Amb.");
+                	LCD_SetCursor(1, 0);
+                	LCD_WriteString(buffer_lcd);
 				}
 
                 if (cmd == CMD_PRES)
@@ -147,33 +147,33 @@ void MEF_main_update() {
 
 					sprintf(buffer_show, "Presión ATM: %.2f hPa\r\n", p2/100.0f);
 					uartSendString((uint8_t*)buffer_show);
+
+					LCD_Clear();
+					sprintf(buffer_lcd, "%.2f hPa", p2/100.0f);
+					LCD_SetCursor(0, 0);
+					LCD_WriteString("Pres. Atm.");
+					LCD_SetCursor(1, 0);
+					LCD_WriteString(buffer_lcd);
+				}
+                if (cmd == CMD_HUM)
+				{
+					ATH_GetData(&t1, &h1);
+
+					sprintf(buffer_show, "Humedad Relativa: %.2f %c\r\n", h1, 0x25);
+					uartSendString((uint8_t*)buffer_show);
+
+					LCD_Clear();
+					sprintf(buffer_lcd, "%.2f%c", h1,0x25);
+					LCD_SetCursor(0, 0);
+					LCD_WriteString("Humedad Rel.");
+					LCD_SetCursor(1, 0);
+					LCD_WriteString(buffer_lcd);
 				}
 
 
-
-
-                /*
-
-                if (ATH_GetData(&t1, &h1) && BMP280_GetData(&t2, &p2))
-                {
-                    sprintf(buffer, "ATH: %.2fC %.2f%%\r\n", t1, h1);
-                    uartSendString((uint8_t*)buffer);
-
-                    sprintf(buffer2, "BMP: %.2fC %.2f hPa\r\n", t2, p2/100.0f);
-                    uartSendString((uint8_t*)buffer2);
-                }
-
-				*/
-
-                LCD_SetCursor(1, 0);
-                LCD_WriteString("T:--.-C P:----");
-
-
-
-
-            currentState = IDLE;
-            flag=false; //Cambio para que solo muestre una vez hasta el próximo comando TEMP? en Pharser
-            break;
+				currentState = IDLE;
+				flag=false; //Cambio para que solo muestre una vez hasta el próximo comando TEMP? en Pharser
+				break;
 
         case ERROR_INIT:
             LCD_SetCursor(0, 0);

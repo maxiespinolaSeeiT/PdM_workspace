@@ -38,8 +38,7 @@ bool_t uartInit(){ //Inicia la uart huart2
 	return false;
 	HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET); //se enciende el LD2 de la Nucleo-F446RE indicando error
   }
-  uartSendString((uint8_t*)"Inicialización de la UART OK \n\r");
-  uartImprimirConfig();
+
   return true; //En caso de que inicialice de forma exitosa
 
 }

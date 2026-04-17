@@ -106,7 +106,7 @@ void cmdPrintHelp(){
 	uartSendString((uint8_t*)"\r\nMENU AYUDA\r\n");
 	uartSendString((uint8_t*)"- Escriba el nombre de los comandos de la lista\r\n");
 	uartSendString((uint8_t*)"- No importa si están en maypuscula o minúscula\r\n");
-	uartSendString((uint8_t*)"- Si escribió mal un caracter, vuelva a ecribir\r\n");
+	uartSendString((uint8_t*)"- Si escribió mal un caracter, presione ENTER y vuelva a ecribir el comando\r\n");
 	uartSendString((uint8_t*)"\r\n");
 }
 
@@ -173,18 +173,21 @@ static void cmdProcessLine(void)
 	if (strcmp(tokens[0], "HELP?") == 0)
 	{
 		currentCmd = CMD_HELP;
+		cmdPrintHelp();
 		return;
 	}
 	//Comando para imprimir el menú
 	if (strcmp(tokens[0], "MENU") == 0)
 	{
 		currentCmd = CMD_MENU;
+		cmdPrintMenu();
 		return;
 	}
 
 
 	// comando desconocido
 	uartSendString((uint8_t*)"ERROR: Comando desconocido\r\n");
+	uartSendString((uint8_t*)"Escriba MENU para ver el menú disponible\r\n");
 
 
 	cmdIndex = 0; // reset buffer

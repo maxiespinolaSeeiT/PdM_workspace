@@ -97,10 +97,10 @@ void BMP280_Update()
 
 
 			if (BMP280_WriteReg(REG_CTRL, &ctrl, 1) != BMP280_OK)
-				return false;
+				state = BMP_IDLE;
 
 			if (BMP280_WriteReg(REG_CONFIG, &cfg, 1) != BMP280_OK)
-				return false;
+				state = BMP_IDLE;
 
 			state = BMP_INIT_CALIB;
 			break;
@@ -124,7 +124,6 @@ void BMP280_Update()
             if (BMP280_WriteReg(REG_CTRL, &ctrl, 1) != BMP280_OK)
             {
                 state = BMP_IDLE;
-                return false;
             }
 
             tick_start = HAL_GetTick();
@@ -142,7 +141,7 @@ void BMP280_Update()
             else if (HAL_GetTick() - tick_start > 100) // timeout
             {
                 state = BMP_IDLE;
-                return false;
+
             }
             break;
 
@@ -174,7 +173,7 @@ void BMP280_Update()
             	    var1_p = (1.0f + var1_p / 32768.0f) * ((float)calib.dig_P1);
 
             	    if (var1_p == 0.0f)
-            	        return false;
+            	    	state = BMP_IDLE;
 
             	    float p = 1048576.0f - (float)adc_P;
             	    p = (p - (var2_p / 4096.0f)) * 6250.0f / var1_p;
@@ -200,10 +199,10 @@ void BMP280_Update()
         case BMP_DONE:
         	data_ready = true;
         	state = BMP_IDLE;
-            return true;
+
     }
 
-    return false;
+
 }
 
 bool_t BMP280_IsReady(void)
