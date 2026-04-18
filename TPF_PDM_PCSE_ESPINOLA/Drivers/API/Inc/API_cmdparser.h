@@ -36,6 +36,7 @@ void cmdPoll(void);
 void cmdPrintHelp(void);
 cmd_t cmdParser_GetCommand(void);
 
+
 /*----------Funciones Privadas------------------*/
 static void cmdPrintMenu(); //Imprime el menu en pantalla
 

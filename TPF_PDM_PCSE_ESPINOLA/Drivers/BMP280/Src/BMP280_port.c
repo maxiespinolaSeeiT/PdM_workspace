@@ -29,13 +29,7 @@ bmp280_status_t BMP280_WriteReg(uint8_t reg, uint8_t *data, uint16_t size)
 
 bmp280_status_t BMP280_ReadReg(uint8_t reg, uint8_t *data, uint16_t size)
 {
-    if (HAL_I2C_Mem_Read(&hi2c1,
-                         BMP280_ADDRESS,
-                         reg,
-                         I2C_MEMADD_SIZE_8BIT,
-                         data,
-                         size,
-                         HAL_MAX_DELAY) == HAL_OK)
+    if (HAL_I2C_Mem_Read(&hi2c1, BMP280_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT,data, size,HAL_MAX_DELAY) == HAL_OK)
     {
         return BMP280_OK;
     }

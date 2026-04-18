@@ -16,9 +16,8 @@
 #include "ATH20_MEF_driver.h"
 #include "BMP280_MEF_driver.h"
 
-bool_t flag;
-float temp, hum;
-//static float bmp_t, bmp_p;
+
+
 
 static MEF_main_state_t currentState = INIT;
 static bool stateInit = true;
@@ -53,10 +52,6 @@ void MEF_main_update() {
 	cmdPoll();
 	ATH_Update();
 	BMP280_Update();
-	//keyP=readKey();
-	keyP=flag;
-
-	//BMP280_Task(&bmp_t, &bmp_p);
 
 	switch (currentState) {
     case INIT:
@@ -66,6 +61,7 @@ void MEF_main_update() {
 				LCD_SetCursor(1, 0);
 				LCD_WriteString("METEOROLOGICA");
 				uartSendString((uint8_t*)"ESTACION METEOROLOGICA\r\n");
+
 				stateInit = false;
 				}
 
@@ -75,6 +71,7 @@ void MEF_main_update() {
 
         case IDLE:
         	if (stateInit) {
+        		uartSendString((uint8_t*)"Escriba MENU para ver los comandos disponible disponible\r\n");
         		uartSendString((uint8_t*)"Ejecute un comando: \r\n");
         		stateInit = false;
         	}
@@ -84,52 +81,58 @@ void MEF_main_update() {
         	    currentState = READ_SENSOR;
         	    stateInit = true;
         	}
-
         	break;
 
         case READ_SENSOR:
-        	if (stateInit) {
+        		if (stateInit) {
         	        ATH_Start();
         	        BMP_Start();
         	        stateInit = false;
         	    }
-
-        	    currentState = PROCESS_DATA;
+        		if (ATH_IsReady() && BMP280_IsReady()) {
+        		        currentState = PROCESS_DATA;
+        		        stateInit = true;
+        		 }
+        	    //currentState = PROCESS_DATA;
         	    stateInit = true;
 
             break;
 
         case PROCESS_DATA:
 
-        	if (ATH_IsReady())
-        	{
-        	    ath_done = true;
-        	}
-
-        	if (BMP280_IsReady())
-        	{
-        	    bmp_done = true;
-        	}
-
-        	if (ath_done && bmp_done)
-        	{
-        	    currentState = SHOW_T_P;
-        	    stateInit = true;
-        	    ath_done = false;
-        	    bmp_done = false;
-        	}
+        	if (cmd == CMD_TEMP)
+			{
+				if (ATH_GetData(&t1, &h1)==true && BMP280_GetData(&t2, &p2)==true)
+				{
+					tempAmbient=(t1+t2)/2.0f; //Calculo el promedio de las temperaturas de los dos sensores
+					currentState = SHOW_T_P;
+				}
+			}
+			if (cmd == CMD_PRES)
+			{
+				if(BMP280_GetData(&t2, &p2)==true)
+				{
+					sprintf(buffer_show, "Presión ATM: %.2f hPa\r\n", p2/100.0f);
+					sprintf(buffer_lcd, "%.2f hPa", p2/100.0f);
+					currentState = SHOW_T_P;
+				}
+			}
+			if (cmd == CMD_HUM)
+			{
+				if(ATH_GetData(&t1, &h1)==true)
+				{
+				sprintf(buffer_show, "Humedad Relativa: %.2f %c\r\n", h1, 0x25);
+				sprintf(buffer_lcd, "%.2f%c", h1,0x25);
+				currentState = SHOW_T_P;
+				}
+			}
 
             break;
 
         case SHOW_T_P:
                 if (cmd == CMD_TEMP)
 				{
-                	ATH_GetData(&t1, &h1);
-                	BMP280_GetData(&t2, &p2);
-
-                	tempAmbient=(t1+t2)/2.0f; //Calculo el promedio de las temperaturas de los dos sensores
-
-
+                	uartSendString((uint8_t*)"Estoy en SHOW_T_P \r\n");
                 	sprintf(buffer_show, "Temperatura Ambiente: %.2f ºC \r\n", tempAmbient);
                 	uartSendString((uint8_t*)buffer_show);
 
@@ -143,13 +146,9 @@ void MEF_main_update() {
 
                 if (cmd == CMD_PRES)
 				{
-					BMP280_GetData(&t2, &p2);
-
-					sprintf(buffer_show, "Presión ATM: %.2f hPa\r\n", p2/100.0f);
 					uartSendString((uint8_t*)buffer_show);
 
 					LCD_Clear();
-					sprintf(buffer_lcd, "%.2f hPa", p2/100.0f);
 					LCD_SetCursor(0, 0);
 					LCD_WriteString("Pres. Atm.");
 					LCD_SetCursor(1, 0);
@@ -157,22 +156,14 @@ void MEF_main_update() {
 				}
                 if (cmd == CMD_HUM)
 				{
-					ATH_GetData(&t1, &h1);
-
-					sprintf(buffer_show, "Humedad Relativa: %.2f %c\r\n", h1, 0x25);
 					uartSendString((uint8_t*)buffer_show);
-
 					LCD_Clear();
-					sprintf(buffer_lcd, "%.2f%c", h1,0x25);
 					LCD_SetCursor(0, 0);
 					LCD_WriteString("Humedad Rel.");
 					LCD_SetCursor(1, 0);
 					LCD_WriteString(buffer_lcd);
 				}
-
-
 				currentState = IDLE;
-				flag=false; //Cambio para que solo muestre una vez hasta el próximo comando TEMP? en Pharser
 				break;
 
         case ERROR_INIT:
@@ -185,6 +176,7 @@ void MEF_main_update() {
             LCD_SetCursor(0, 0);
             LCD_WriteString("ERROR_SENS");
             uartSendString((uint8_t*)"STATE: ERROR_SENS\r\n");
+            currentState = INIT;
             break;
 
         default:

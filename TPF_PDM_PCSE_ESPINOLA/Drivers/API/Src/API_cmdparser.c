@@ -110,17 +110,30 @@ void cmdPrintHelp(){
 	uartSendString((uint8_t*)"\r\n");
 }
 
-static void cmdPrintMenu(){
-	//uartSendString((uint8_t*)"ESTOY EN IMPRIMIR HELP\r\n");
-	uartSendString((uint8_t*)"\r\nESTACIÓN METEOROLÓGICA:\r\n");
-	uartSendString((uint8_t*)"\r\nLista de comandos disponibles\r\n");
-	uartSendString((uint8_t*)"TEMP? -> Muestra teperatura actual\r\n");
-	uartSendString((uint8_t*)"PRES? -> Muestra la presión atmosférica en hPa\r\n");
-	uartSendString((uint8_t*)"HUM? -> Muestra la humedad relativa \r\n");
-	uartSendString((uint8_t*)"HELP? -> Ayuda\r\n");
-	uartSendString((uint8_t*)"MENU -> Vuelve a este menú\r\n");
+void cmdPrintMenu(){
+
+	uartSendString((uint8_t*)"\r\n");
+	uartSendString((uint8_t*)"=====================================\r\n");
+	uartSendString((uint8_t*)"      ESTACIÓN METEOROLÓGICA\r\n");
+	uartSendString((uint8_t*)"=====================================\r\n");
+
+	uartSendString((uint8_t*)"\r\n Comandos disponibles:\r\n");
+	uartSendString((uint8_t*)"-------------------------------------\r\n");
+
+	uartSendString((uint8_t*)" TEMP?  -> Ver temperatura actual [°C]\r\n");
+	uartSendString((uint8_t*)" PRES?  -> Ver presión [hPa]\r\n");
+	uartSendString((uint8_t*)" HUM?   -> Ver humedad relativa [%]\r\n");
+	uartSendString((uint8_t*)" HELP?  -> Mostrar ayuda\r\n");
+	uartSendString((uint8_t*)" MENU   -> Mostrar este menú\r\n");
+
+	uartSendString((uint8_t*)"-------------------------------------\r\n");
 	uartSendString((uint8_t*)"\r\n");
 }
+
+
+
+
+
 
 static void cmdProcessLine(void)
 {
@@ -187,7 +200,7 @@ static void cmdProcessLine(void)
 
 	// comando desconocido
 	uartSendString((uint8_t*)"ERROR: Comando desconocido\r\n");
-	uartSendString((uint8_t*)"Escriba MENU para ver el menú disponible\r\n");
+	uartSendString((uint8_t*)"Escriba MENU para ver los comandos disponible disponible\r\n");
 
 
 	cmdIndex = 0; // reset buffer
