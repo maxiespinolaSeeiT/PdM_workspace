@@ -5,11 +5,11 @@
  *      Author: Usuario
  */
 
-#ifndef I2C_INC_I2C_PORT_H_
-#define I2C_INC_I2C_PORT_H_
+#ifndef API_INC_API_I2C_H_
+#define API_INC_API_I2C_H_
 
 #include "stm32f4xx_hal.h"
 
 void MX_I2C1_Init(void);
 
-#endif /* I2C_INC_I2C_PORT_H_ */
+#endif /* API_INC_API_I2C_H_ */

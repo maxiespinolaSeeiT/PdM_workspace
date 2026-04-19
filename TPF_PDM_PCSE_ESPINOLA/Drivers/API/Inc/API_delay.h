@@ -14,9 +14,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "stm32f4xx_hal.h"
+#include "API_common_types.h"
 
 typedef uint32_t tick_t;
-typedef bool bool_t;
+//typedef bool bool_t;
 typedef uint8_t aux;
 
 typedef struct{

@@ -6,9 +6,9 @@
  */
 
 
+#include <MEF/Inc/MEF_main.h>
 #include "API_cmdparser.h"
 #include "API_uart.h"
-#include "MEF_main.h"
 
 typedef enum {
 	CMD_IDLE,
@@ -110,7 +110,7 @@ void cmdPrintHelp(){
 	uartSendString((uint8_t*)"\r\n");
 }
 
-void cmdPrintMenu(){
+static void cmdPrintMenu(void){
 
 	uartSendString((uint8_t*)"\r\n");
 	uartSendString((uint8_t*)"=====================================\r\n");

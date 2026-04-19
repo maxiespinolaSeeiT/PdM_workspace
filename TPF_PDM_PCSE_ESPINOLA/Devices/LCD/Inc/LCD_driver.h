@@ -10,7 +10,8 @@
 
 #include <stdint.h>
 #include "stm32f4xx_hal.h"
-#include "LCD_port.h"
+
+#include "../../../Devices/LCD/Inc/LCD_port.h"
 
 // API pública
 void LCD_Init(void);

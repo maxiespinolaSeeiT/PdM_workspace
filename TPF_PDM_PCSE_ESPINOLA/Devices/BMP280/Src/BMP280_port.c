@@ -5,8 +5,9 @@
  *      Author: Usuario
  */
 
-#include "BMP280_port.h"
-#include "I2C_port.h"
+#include "../../../Devices/BMP280/Inc/BMP280_port.h"
+
+#include "API_I2C.h"
 
 extern I2C_HandleTypeDef hi2c1;
 

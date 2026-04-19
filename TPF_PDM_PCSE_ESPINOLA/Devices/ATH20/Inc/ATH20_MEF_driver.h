@@ -9,13 +9,14 @@
 #define ATH20_INC_ATH20_MEF_DRIVER_H_
 
 #include "stdint.h"
+#include "API_common_types.h"
 
-typedef bool bool_t;
 void ATH_Init(void); //Inicializa el sensor
 void ATH_Start(void); //Dispara la lectura del driver
 void ATH_Update(void); //Actualiza la MEF del sensor
 bool_t ATH_IsReady(void); //Avisa si termió de procesar
 bool_t ATH_GetData(float *temp, float *hum); //Obtiene los datos del sensor
 uint8_t ATH_ReadStatus(void); //Lee el primer byte para controlar el estado del sensor
+bool_t ATH_Is_Init(void);
 
 #endif /* ATH20_INC_ATH20_MEF_DRIVER_H_ */

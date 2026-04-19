@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "stm32f4xx_hal.h"
-#include "I2C_port.h"
+#include "API_I2C.h"
 
 #define ADDR_I2C_LCD_PCF8574T 0x27 //Configurar dirección I2C del módulo
 

@@ -4,9 +4,11 @@
  *  Created on: Apr 11, 2026
  *      Author: Maximiliano Ariel Espínola
  */
+#include "../../../Devices/BMP280/Inc/BMP280_MEF_driver.h"
+
 #include "stdint.h"
-#include "BMP280_MEF_driver.h"
-#include "BMP280_port.h"
+
+#include "../../../Devices/BMP280/Inc/BMP280_port.h"
 
 // Registros
 #define REG_CALIB  0x88

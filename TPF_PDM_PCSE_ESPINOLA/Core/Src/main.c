@@ -17,15 +17,15 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-#include <ATH20_driver.old>
+
 #include "main.h"
 
 
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "I2C_port.h"
-#include "MEF_main.h"
+
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -102,8 +102,8 @@ int main(void)
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   MEF_main_init();
-  debounceFSM_init();
-  cmdParserInit();
+
+
   //ATH_Init();
   /* USER CODE END 2 */
 

@@ -4,10 +4,12 @@
  *  Created on: Apr 15, 2026
  *      Author: Usuario
  */
-#include "ATH20_port.h"
-#include "ATH20_MEF_driver.h"
+#include "../../../Devices/ATH20/Inc/ATH20_MEF_driver.h"
+
 #include "stdint.h"
 #include "API_uart.h"
+#include "../../../Devices/ATH20/Inc/ATH20_port.h"
+#include "API_I2C.h"
 
 //Comandos del sensor
 #define CMD_INIT       0xBE // Inicializar
@@ -59,9 +61,10 @@ void ATH_Update(void)
             break;
 
         case ATH_STATE_INIT_SEND:
-        	ATH_I2C_Write(cmdInit1, 3);
-            tick = HAL_GetTick();
-            state = ATH_STATE_INIT_WAIT;
+        	if(ATH_I2C_Write(cmdInit1, 3)==ATH_OK){
+        		tick = HAL_GetTick();
+        		state = ATH_STATE_INIT_WAIT;
+        	}
             break;
 
         case ATH_STATE_INIT_WAIT:
@@ -78,9 +81,8 @@ void ATH_Update(void)
                 initialized = true;
                 state = ATH_STATE_TRIGGER;
             } else {
-                // reintento
-            	uartSendString((uint8_t*)"No se pudo inicializar el ATH20, reinicio...\r\n");
-                state = ATH_STATE_INIT_SEND;
+
+                state = ATH_STATE_ERROR;
             }
         }
         break;
@@ -145,6 +147,7 @@ void ATH_Update(void)
             break;
 
         case ATH_STATE_ERROR:
+        	//SI da error queda detenida acá la MEF y la MEF_main envia un mensaje de controlar la conexion
             break;
     }
 }
@@ -181,7 +184,17 @@ bool_t ATH_GetData(float *temp, float *hum)
 }
 
 void ATH_Init(void) {
+	MX_I2C1_Init();
 	state=ATH_STATE_INIT_SEND;
+}
+
+bool_t ATH_Is_Init(void) {
+
+	if(state==ATH_STATE_ERROR){
+		return false;
+	}else{
+		return true;
+	}
 }
 
 //Lee el primer byte del sensor para ver el estado

@@ -6,11 +6,11 @@
  *  Created on: Apr 12, 2026
  *      Author: Maxmiliano Ariel Espinola
  */
-#include "MEF_main.h"
+#include <MEF/Inc/MEF_main.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "API_debounce.h"
+
 #include "API_uart.h"
 #include "API_cmdparser.h"
 #include "ATH20_MEF_driver.h"
@@ -21,14 +21,8 @@
 
 static MEF_main_state_t currentState = INIT;
 static bool stateInit = true;
-static bool_t keyP=false;
-
-static bool ath_done = false;
-static bool bmp_done = false;
 
 cmd_t cmd = CMD_NONE;
-
-
 
 float t1, h1; //Temperatura y Humedad del ATH20
 float t2, p2; //Temperatura y Presion ATM del BMP280
@@ -40,7 +34,8 @@ char buffer_lcd[16];
 void MEF_main_init() {
     currentState = INIT;
     uartInit();
-    debounceFSM_init();
+    cmdParserInit();
+
     LCD_Init();
     ATH_Init();
     BMP_Init();
@@ -48,7 +43,7 @@ void MEF_main_init() {
 }
 
 void MEF_main_update() {
-	debounceFSM_update();
+
 	cmdPoll();
 	ATH_Update();
 	BMP280_Update();
@@ -76,6 +71,7 @@ void MEF_main_update() {
         		stateInit = false;
         	}
         	cmd= cmdParser_GetCommand();
+
         	if (cmd != CMD_NONE && cmd != CMD_MENU && cmd!=CMD_HELP)
         	{
         	    currentState = READ_SENSOR;
@@ -89,10 +85,18 @@ void MEF_main_update() {
         	        BMP_Start();
         	        stateInit = false;
         	    }
-        		if (ATH_IsReady() && BMP280_IsReady()) {
-        		        currentState = PROCESS_DATA;
-        		        stateInit = true;
-        		 }
+        		if(!ATH_Is_Init()){
+        			uartSendString((uint8_t*)"No se pudo inicializar el sensor ATH20 \r\n");
+        			uartSendString((uint8_t*)"Verifique la conexion del hardware\r\n");
+        			LCD_Clear();
+        			LCD_SetCursor(0, 0);
+        			LCD_WriteString("ERROR ATH20");
+        			currentState=ERROR_INIT;
+        		}
+					if (ATH_IsReady() && BMP280_IsReady()) {
+							currentState = PROCESS_DATA;
+							stateInit = true;
+					 }
         	    //currentState = PROCESS_DATA;
         	    stateInit = true;
 
@@ -167,9 +171,18 @@ void MEF_main_update() {
 				break;
 
         case ERROR_INIT:
-            LCD_SetCursor(0, 0);
-            LCD_WriteString("ERROR_INIT");
-            uartSendString((uint8_t*)"STATE: ERROR INIT\r\n");
+        	if(!ATH_Is_Init()){
+        		uartSendString((uint8_t*)"Se vuelve a intentar el inicio del ATH20 en 10 segundos.\r\n");
+        		for (uint8_t i=0;i<10;i++){
+					uartSendString((uint8_t*)".");
+					HAL_Delay(1000);
+        		}
+        		MEF_main_init();
+				uartSendString((uint8_t*)"\r\n \r\n");
+				currentState = INIT;
+				break;
+        	}
+
             break;
 
         case ERROR_SENS:

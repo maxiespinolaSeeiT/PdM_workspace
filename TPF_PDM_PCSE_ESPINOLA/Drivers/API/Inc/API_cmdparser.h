@@ -8,7 +8,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
-#include "API_debounce.h"
+
 
 
 #ifndef API_INC_API_CMDPARSER_H_
@@ -38,8 +38,8 @@ cmd_t cmdParser_GetCommand(void);
 
 
 /*----------Funciones Privadas------------------*/
-static void cmdPrintMenu(); //Imprime el menu en pantalla
+static void cmdPrintMenu(void); //Imprime el menu en pantalla
 
-static const char* cmdStatusToString(cmd_status_t);
+
 
 #endif /* API_INC_API_CMDPARSER_H_ */

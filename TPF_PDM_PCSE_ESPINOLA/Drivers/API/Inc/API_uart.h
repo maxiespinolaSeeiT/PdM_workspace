@@ -22,8 +22,8 @@ void uartSendString(uint8_t * pstring); //Envia un string de datos por la UART
 void uartSendStringSize(uint8_t * pstring, uint16_t size);//Envia una cantidad definida por size por la UART
 void uartReceiveStringSize(uint8_t * pstring, uint16_t size); //Recibe en el puntero que indiquemos como argumento la cantidad de bytes que carguemos en size
 void uartImprimirConfig(); //Envia por la UART la configuracion actual
-bool_t uartReceiveByte(uint8_t *pstring); //funcion para ver si recibí o no algo
 
+bool_t uartReceiveByte(uint8_t *pstring); //funcion para ver si recibí o no algo
 uint32_t consultaBaudrate(); //Es un getter para saber el baudrate actual de la UART
 bool_t uartSetBaudrate(uint32_t); //Es un setter para cambiar el baudrate de la UART
 void uartFlush(); //Limpia el buffer de la UART

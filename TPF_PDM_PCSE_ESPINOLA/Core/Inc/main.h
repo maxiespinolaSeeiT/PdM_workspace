@@ -31,7 +31,8 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "MEF_main.h"
+#include "API_I2C.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
