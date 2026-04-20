@@ -25,7 +25,8 @@ typedef enum {
     CMD_HUM,
     CMD_HELP,
     CMD_MENU,
-	CMD_REBOOT
+	CMD_REBOOT,
+	CMD_RESTART
 } cmd_t;
 
 

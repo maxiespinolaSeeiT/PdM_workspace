@@ -237,24 +237,6 @@ void MEF_main_update() {
 				}
 				currentState = IDLE;
 				break;
-
-        case ERROR_INIT:
-        	ATH_Forced_Error();
-        	BMP_Forced_Error();
-       		uartSendString((uint8_t*)"El sistema se reiniciará en 10 segundos.\r\n");
-			for (uint8_t i=0;i<5;i++){ //Interactua con el usuario para que obtenga el feedback de los 5 segundos
-				uartSendString((uint8_t*)".");
-				HAL_Delay(1000);
-			}
-			uartSendString((uint8_t*)"\r\n");
-
-			LCD_Clear();
-			LCD_SetCursor(0, 0);
-			LCD_WriteString("ERROR");
-			HAL_Delay(2000);
-			currentState = REBOOT;
-			break;
-
         case REBOOT:
         	uartSendString((uint8_t*)"Reiniciando el sistema, aguarde por favor \r\n");
         	LCD_Clear();
@@ -272,7 +254,36 @@ void MEF_main_update() {
         	MEF_main_init();
         	currentState = INIT;
         	break;
+        case ERROR_INIT:
+            ATH_Forced_Error();
+            BMP_Forced_Error();
 
+            uartSendString((uint8_t*)"Error de hardware detectado\r\n");
+            uartSendString((uint8_t*)"Verifique conexiones I2C (SCL/SDA)\r\n");
+            uartSendString((uint8_t*)"Escriba el comando RESTART y presione ENTER para reiniciar...\r\n");
+
+            currentState = WAIT_USER;
+            stateInit = true;
+            break;
+
+        case WAIT_USER:
+            if(stateInit){
+                stateInit = false;
+            }
+
+            cmd = cmdParser_GetCommand();
+
+            if(cmd == CMD_RESTART || cmd != CMD_NONE){
+                uartSendString((uint8_t*)"Reintentando inicializacion...\r\n");
+
+                I2C_Force_Restart();
+                HAL_Delay(50);
+
+                stateInit = true;
+                MEF_main_init();
+                currentState = INIT;
+            }
+            break;
         default:
             currentState = ERROR_INIT;
             break;

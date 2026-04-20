@@ -207,10 +207,15 @@ static void cmdProcessLine(void)
 	//Comando para reiniciar el sistema
 	if (strcmp(tokens[0], "REBOOT") == 0)
 		{
-			currentCmd = CMD_REBOOT;
-			return;
+		currentCmd = CMD_REBOOT;
+		return;
 		}
-
+	//Comando para reiniciar despues de error de HW
+	if (strcmp(tokens[0], "RESTART") == 0)
+		{
+		currentCmd = CMD_RESTART;
+		return;
+		}
 
 	// comando desconocido
 	uartSendString((uint8_t*)"ERROR: Comando desconocido\r\n");

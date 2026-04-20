@@ -19,6 +19,7 @@ PROCESS_DATA,
 SHOW_T_P_H,
 ERROR_INIT,
 REBOOT,
+WAIT_USER,
 } MEF_main_state_t;
 
 void MEF_main_init(); // Inicia el dispositivo y sus perisféricos
