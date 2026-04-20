@@ -29,7 +29,7 @@ static void LCD_SendNibble(uint8_t nibble, uint8_t control)
 
 void LCD_Init(void)
 {
-	MX_I2C1_Init();
+
 
     LCD_Port_Delay(50);
 

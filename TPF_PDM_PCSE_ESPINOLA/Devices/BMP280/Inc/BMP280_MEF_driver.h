@@ -23,6 +23,9 @@ bool_t BMP280_IsReady(void);
 bool_t BMP280_GetData(float *t, float *p);
 void BMP_Init();
 void BMP_Start(void);
+bool_t BMP_Is_Init(void);
+void BMP_Forced_Error(void);
+bool_t BMP_initialized(void);
 
 
 

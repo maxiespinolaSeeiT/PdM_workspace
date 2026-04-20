@@ -10,7 +10,7 @@ I2C_HandleTypeDef hi2c1;
 
 
 
-void MX_I2C1_Init(void)
+bool_t I2C_init(void)
 {
   hi2c1.Instance = I2C1;
   hi2c1.Init.ClockSpeed = 100000;
@@ -24,6 +24,17 @@ void MX_I2C1_Init(void)
   if (HAL_I2C_Init(&hi2c1) != HAL_OK)
   {
     Error_Handler();
+    return false;
+  }else{
+	  return true;
   }
 
+}
+
+void I2C_Force_Restart(void){
+	// Reset del periférico I2C para liberar el bus si quedó bloqueado
+	__HAL_RCC_I2C1_FORCE_RESET();
+	HAL_Delay(10);
+	__HAL_RCC_I2C1_RELEASE_RESET();
+	HAL_Delay(10);
 }

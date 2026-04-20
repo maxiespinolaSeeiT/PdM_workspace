@@ -9,7 +9,10 @@
 #define API_INC_API_I2C_H_
 
 #include "stm32f4xx_hal.h"
+#include "API_common_types.h"
 
-void MX_I2C1_Init(void);
+
+bool_t I2C_init(void);
+void I2C_Force_Restart(void);
 
 #endif /* API_INC_API_I2C_H_ */

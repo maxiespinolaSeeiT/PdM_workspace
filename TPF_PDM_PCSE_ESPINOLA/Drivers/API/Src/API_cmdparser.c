@@ -102,10 +102,14 @@ void cmdPoll(void)
 }
 
 void cmdPrintHelp(){
-	//uartSendString((uint8_t*)"ESTOY EN IMPRIMIR HELP\r\n");
-	uartSendString((uint8_t*)"\r\nMENU AYUDA\r\n");
-	uartSendString((uint8_t*)"- Escriba el nombre de los comandos de la lista\r\n");
-	uartSendString((uint8_t*)"- No importa si están en maypuscula o minúscula\r\n");
+	uartSendString((uint8_t*)"\r\n");
+	uartSendString((uint8_t*)"=====================================\r\n");
+	uartSendString((uint8_t*)"               AYDUA\r\n");
+	uartSendString((uint8_t*)"=====================================\r\n");
+	uartSendString((uint8_t*)"\r\n");
+	uartSendString((uint8_t*)"-------------------------------------\r\n");
+	uartSendString((uint8_t*)"- Escriba el nombre de los comandos indicados en el menú y luego presione ENTER\r\n");
+	uartSendString((uint8_t*)"- No importa si están en mayúscula o minúscula\r\n");
 	uartSendString((uint8_t*)"- Si escribió mal un caracter, presione ENTER y vuelva a ecribir el comando\r\n");
 	uartSendString((uint8_t*)"\r\n");
 }
@@ -125,9 +129,13 @@ static void cmdPrintMenu(void){
 	uartSendString((uint8_t*)" HUM?   -> Ver humedad relativa [%]\r\n");
 	uartSendString((uint8_t*)" HELP?  -> Mostrar ayuda\r\n");
 	uartSendString((uint8_t*)" MENU   -> Mostrar este menú\r\n");
+	uartSendString((uint8_t*)" REBOOT -> Reinicia el sistema\r\n");
 
 	uartSendString((uint8_t*)"-------------------------------------\r\n");
+
+
 	uartSendString((uint8_t*)"\r\n");
+	uartSendString((uint8_t*)"Escriba un comando y presione ENTER: \r\n");
 }
 
 
@@ -196,6 +204,12 @@ static void cmdProcessLine(void)
 		cmdPrintMenu();
 		return;
 	}
+	//Comando para reiniciar el sistema
+	if (strcmp(tokens[0], "REBOOT") == 0)
+		{
+			currentCmd = CMD_REBOOT;
+			return;
+		}
 
 
 	// comando desconocido

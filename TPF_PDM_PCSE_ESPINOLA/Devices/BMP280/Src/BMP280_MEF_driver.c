@@ -9,6 +9,7 @@
 #include "stdint.h"
 
 #include "../../../Devices/BMP280/Inc/BMP280_port.h"
+#include "API_uart.h"
 
 // Registros
 #define REG_CALIB  0x88
@@ -46,7 +47,8 @@ typedef enum {
     BMP_START,
     BMP_WAIT,
     BMP_READ,
-    BMP_DONE
+    BMP_DONE,
+	BMP_ERROR,
 } bmp_state_t;
 
 static bmp_state_t state = BMP_IDLE;
@@ -59,25 +61,32 @@ static bool_t data_ready = false;
 static bool_t initialized = false;
 
 
+
+
 //Toma los datos de calibración del sensor
-static void BMP280_ReadCalibration(void)
+bmp280_status_t BMP280_ReadCalibration(void)
 {
     uint8_t data[24];
-    BMP280_ReadReg(REG_CALIB, data, 24);
+    if((BMP280_ReadReg(REG_CALIB, data, 24))==BMP280_OK){
+		calib.dig_T1 = (data[1] << 8) | data[0];
+		calib.dig_T2 = (data[3] << 8) | data[2];
+		calib.dig_T3 = (data[5] << 8) | data[4];
 
-    calib.dig_T1 = (data[1] << 8) | data[0];
-    calib.dig_T2 = (data[3] << 8) | data[2];
-    calib.dig_T3 = (data[5] << 8) | data[4];
-
-    calib.dig_P1 = (data[7] << 8) | data[6];
-    calib.dig_P2 = (data[9] << 8) | data[8];
-    calib.dig_P3 = (data[11] << 8) | data[10];
-    calib.dig_P4 = (data[13] << 8) | data[12];
-    calib.dig_P5 = (data[15] << 8) | data[14];
-    calib.dig_P6 = (data[17] << 8) | data[16];
-    calib.dig_P7 = (data[19] << 8) | data[18];
-    calib.dig_P8 = (data[21] << 8) | data[20];
-    calib.dig_P9 = (data[23] << 8) | data[22];
+		calib.dig_P1 = (data[7] << 8) | data[6];
+		calib.dig_P2 = (data[9] << 8) | data[8];
+		calib.dig_P3 = (data[11] << 8) | data[10];
+		calib.dig_P4 = (data[13] << 8) | data[12];
+		calib.dig_P5 = (data[15] << 8) | data[14];
+		calib.dig_P6 = (data[17] << 8) | data[16];
+		calib.dig_P7 = (data[19] << 8) | data[18];
+		calib.dig_P8 = (data[21] << 8) | data[20];
+		calib.dig_P9 = (data[23] << 8) | data[22];
+		return BMP280_OK;
+    }
+    else
+    {
+    	return BMP280_ERROR;
+    }
 }
 
 void BMP280_Update()
@@ -92,25 +101,27 @@ void BMP280_Update()
 
         case BMP_INIT_CONFIG: // CONFIG
 		{
-			uint8_t ctrl = 0x25; //Mofo FORCED
+			uint8_t ctrl = 0x24; //Modo SLEEP
 			uint8_t cfg  = 0xA0;
 
-			//BMP280_WriteReg(uint8_t reg, uint8_t *data, uint16_t size);
-
-
-			if (BMP280_WriteReg(REG_CTRL, &ctrl, 1) != BMP280_OK)
-				state = BMP_IDLE;
-
-			if (BMP280_WriteReg(REG_CONFIG, &cfg, 1) != BMP280_OK)
-				state = BMP_IDLE;
-
+			if (BMP280_WriteReg(REG_CTRL, &ctrl, 1) != BMP280_OK) {
+				state = BMP_ERROR;
+				break;
+			}
+			if (BMP280_WriteReg(REG_CONFIG, &cfg, 1) != BMP280_OK) {
+				state = BMP_ERROR;
+				break;
+			}
 			state = BMP_INIT_CALIB;
 			break;
 		}
         case BMP_INIT_CALIB:
         {
-        	BMP280_ReadCalibration();
-			state = BMP_INIT_DONE;
+        	if(BMP280_ReadCalibration()==BMP280_OK){
+        		state = BMP_INIT_DONE;
+        	}else{
+        		state=BMP_ERROR;
+        	}
 			break;
         }
 
@@ -118,14 +129,16 @@ void BMP280_Update()
         {
         	initialized = true;
         	state = BMP_IDLE;
+        	break;
         }
 
         case BMP_START:
         {
-            uint8_t ctrl = 0x24; // FORCED MODE
+            uint8_t ctrl = 0x25; // FORCED MODE
             if (BMP280_WriteReg(REG_CTRL, &ctrl, 1) != BMP280_OK)
             {
-                state = BMP_IDLE;
+            	state=BMP_ERROR;
+            	break;
             }
 
             tick_start = HAL_GetTick();
@@ -134,6 +147,9 @@ void BMP280_Update()
         }
 
         case BMP_WAIT:
+        	if (HAL_GetTick() - tick_start < 10)  // esperar al menos 10ms
+        	        break;
+
             BMP280_ReadReg(REG_STATUS, &status, 1);
 
             if (!(status & 0x08)) // terminó medición
@@ -142,7 +158,7 @@ void BMP280_Update()
             }
             else if (HAL_GetTick() - tick_start > 100) // timeout
             {
-                state = BMP_IDLE;
+                state = BMP_ERROR;
 
             }
             break;
@@ -201,7 +217,10 @@ void BMP280_Update()
         case BMP_DONE:
         	data_ready = true;
         	state = BMP_IDLE;
+        	break;
+        case BMP_ERROR:
 
+        	break;
     }
 
 
@@ -234,6 +253,33 @@ void BMP_Start(void)
 
 }
 void BMP_Init(){
+	initialized = false;
 	state = BMP_INIT_CONFIG;
+}
+
+/*
+bool_t BMP_Is_Init(void){
+    if(state == BMP_ERROR){ uartSendString((uint8_t*)"BMP_IS-Init BMP_ERROR \r\n");  return false;}
+    if(state == BMP_IDLE && !initialized) { uartSendString((uint8_t*)"BMP_IS-Init BMP_IDLE && !initialized \r\n");  return false;} // nunca se inicializó
+    // Si todavía está inicializando, no es error todavía
+	if (state == BMP_INIT_CONFIG || state == BMP_INIT_CALIB) return true; // pendiente, no error
+	return initialized;
+}*/
+
+bool_t BMP_Is_Init(void){
+if(state==BMP_ERROR){
+		initialized = false;
+		return false;
+	}else{
+		return true;
+	}
+}
+void BMP_Forced_Error(void){
+	initialized = false;
+	state=BMP_ERROR;
+}
+
+bool_t BMP_initialized(void) {
+    return initialized;
 }
 

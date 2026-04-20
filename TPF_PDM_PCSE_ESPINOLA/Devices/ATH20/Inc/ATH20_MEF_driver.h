@@ -18,5 +18,7 @@ bool_t ATH_IsReady(void); //Avisa si termió de procesar
 bool_t ATH_GetData(float *temp, float *hum); //Obtiene los datos del sensor
 uint8_t ATH_ReadStatus(void); //Lee el primer byte para controlar el estado del sensor
 bool_t ATH_Is_Init(void);
+void ATH_Forced_Error(void);
+bool_t ATH_initialized(void);
 
 #endif /* ATH20_INC_ATH20_MEF_DRIVER_H_ */

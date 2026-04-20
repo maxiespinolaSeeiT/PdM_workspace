@@ -71,6 +71,9 @@ void ATH_Update(void)
             if (HAL_GetTick() - tick >= 10) { // tiempo datasheet
                 state = ATH_STATE_INIT_CHECK;
             }
+            if (HAL_GetTick() - tick > 200) {   // timeout
+				state = ATH_STATE_ERROR;
+			}
             break;
 
         case ATH_STATE_INIT_CHECK:
@@ -79,7 +82,7 @@ void ATH_Update(void)
 
             if (status & 0x08) { // calibrado OK
                 initialized = true;
-                state = ATH_STATE_TRIGGER;
+                state = ATH_STATE_IDLE;
             } else {
 
                 state = ATH_STATE_ERROR;
@@ -108,6 +111,10 @@ void ATH_Update(void)
             {
                 state = ATH_STATE_READ;
             }
+            if ((HAL_GetTick() - tick_start) > 500) //Timeout
+			{
+				state = ATH_STATE_ERROR;
+			}
             break;
 
         case ATH_STATE_READ:
@@ -148,26 +155,22 @@ void ATH_Update(void)
 
         case ATH_STATE_ERROR:
         	//SI da error queda detenida acá la MEF y la MEF_main envia un mensaje de controlar la conexion
+
             break;
     }
 }
 
 void ATH_Start(void)
 {
-    if (state == ATH_STATE_IDLE)
+	if (!initialized) return;
+    if (state == ATH_STATE_IDLE || state == ATH_STATE_DONE)
     {
         state = ATH_STATE_TRIGGER;
     }
 }
 
-bool_t ATH_IsReady(void)
-{
-    if(state == ATH_STATE_DONE){
-    	return true;
-    	state = ATH_STATE_IDLE;
-    }else{
-    	return false;
-    }
+bool_t ATH_IsReady(void) {
+    return (state == ATH_STATE_DONE);  // solo consulta, no modifica el estado
 }
 
 bool_t ATH_GetData(float *temp, float *hum)
@@ -184,13 +187,14 @@ bool_t ATH_GetData(float *temp, float *hum)
 }
 
 void ATH_Init(void) {
-	MX_I2C1_Init();
+	initialized = false;
 	state=ATH_STATE_INIT_SEND;
 }
 
 bool_t ATH_Is_Init(void) {
 
 	if(state==ATH_STATE_ERROR){
+		initialized = false;
 		return false;
 	}else{
 		return true;
@@ -207,4 +211,13 @@ uint8_t ATH_ReadStatus(void)
     }
 
     return status;
+}
+
+void ATH_Forced_Error(void){
+	initialized = false;
+	state=ATH_STATE_ERROR;
+}
+
+bool_t ATH_initialized(void) {
+    return initialized;
 }

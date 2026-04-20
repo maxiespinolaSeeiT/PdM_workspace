@@ -13,12 +13,12 @@
 
 typedef enum{
 INIT,
-ERROR_INIT,
 IDLE,
 READ_SENSOR,
 PROCESS_DATA,
-SHOW_T_P,
-ERROR_SENS,
+SHOW_T_P_H,
+ERROR_INIT,
+REBOOT,
 } MEF_main_state_t;
 
 void MEF_main_init(); // Inicia el dispositivo y sus perisféricos
