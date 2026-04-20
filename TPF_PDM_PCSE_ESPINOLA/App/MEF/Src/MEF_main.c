@@ -162,6 +162,7 @@ void MEF_main_update() {
 												//de los dos sensores
 					currentState = SHOW_T_P_H;
 				}
+				sprintf(buffer_show, "Temperatura Ambiente: %.2f ºC \r\n", tempAmbient);
 			}
 			if (lastCmd == CMD_PRES)
 			{
@@ -187,7 +188,6 @@ void MEF_main_update() {
         case SHOW_T_P_H:
                 if (lastCmd == CMD_TEMP)
 				{
-                	sprintf(buffer_show, "Temperatura Ambiente: %.2f ºC \r\n", tempAmbient);
                 	uartSendString((uint8_t*)buffer_show);
 
                 	LCD_Clear();
