@@ -9,7 +9,8 @@
 #include "stdint.h"
 #include "API_uart.h"
 #include "../../../Devices/ATH20/Inc/ATH20_port.h"
-#include "API_I2C.h"
+
+#include "../../../BSP/Inc/BSP_I2C.h"
 
 //Comandos del sensor
 #define CMD_INIT       0xBE // Inicializar

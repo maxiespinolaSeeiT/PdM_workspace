@@ -4,7 +4,7 @@
  *  Created on: Apr 15, 2026
  *      Author: Usuario
  */
-#include <API_I2C.h>
+#include <BSP_I2C.h>
 
 I2C_HandleTypeDef hi2c1;
 

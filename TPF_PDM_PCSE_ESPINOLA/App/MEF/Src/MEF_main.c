@@ -15,7 +15,8 @@
 #include "API_cmdparser.h"
 #include "ATH20_MEF_driver.h"
 #include "BMP280_MEF_driver.h"
-#include "API_I2C.h"
+
+#include "../../../BSP/Inc/BSP_I2C.h"
 
 
 
