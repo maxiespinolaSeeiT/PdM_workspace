@@ -20,8 +20,6 @@
 #define USART_RX_GPIO_Port GPIOA
 #define TIMEOUT 10
 
-
-
 bool_t uartInit(){
 
 	if(bsp_uart_init(BAUDRATE_UART)){

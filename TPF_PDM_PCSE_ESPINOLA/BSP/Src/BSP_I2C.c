@@ -2,13 +2,12 @@
  * I2C_port.c
  *
  *  Created on: Apr 15, 2026
- *      Author: Usuario
+ *      Author: Espínola Maximiliano Ariel
  */
 #include <BSP_I2C.h>
+#include "stm32f4xx_hal.h"
 
 I2C_HandleTypeDef hi2c1;
-
-
 
 bool_t I2C_init(void)
 {
@@ -37,4 +36,33 @@ void I2C_Force_Restart(void){
 	HAL_Delay(10);
 	__HAL_RCC_I2C1_RELEASE_RESET();
 	HAL_Delay(10);
+}
+
+bool_t bsp_i2c_write(uint8_t *data, uint16_t size, uint16_t address){
+	if (HAL_I2C_Master_Transmit(&hi2c1, address, data, size, HAL_MAX_DELAY) == HAL_OK) {
+		return true;
+	}
+	return false;
+}
+
+bool_t bsp_i2c_read(uint8_t *data, uint16_t size, uint16_t address){
+	if (HAL_I2C_Master_Receive(&hi2c1, address, data, size, HAL_MAX_DELAY) == HAL_OK) {
+		return true;
+	}
+	return false;
+}
+
+void bsp_i2c_delay(uint32_t ms){
+	HAL_Delay(ms);
+}
+
+void Error_Handler(void)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1)
+  {
+  }
+  /* USER CODE END Error_Handler_Debug */
 }
