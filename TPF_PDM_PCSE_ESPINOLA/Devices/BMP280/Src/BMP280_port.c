@@ -22,7 +22,7 @@ bmp280_status_t BMP280_WriteReg(uint8_t reg, uint8_t *data, uint16_t size)
         buffer[i + 1] = data[i];
     }
 
-    if (HAL_I2C_Master_Transmit(&hi2c1, BMP280_ADDRESS, buffer, size + 1, HAL_MAX_DELAY) == HAL_OK)
+    if (bsp_i2c_write(buffer, size+1, BMP280_ADDRESS))
     {
     	return BMP280_OK;
     }
@@ -31,14 +31,13 @@ bmp280_status_t BMP280_WriteReg(uint8_t reg, uint8_t *data, uint16_t size)
 
 bmp280_status_t BMP280_ReadReg(uint8_t reg, uint8_t *data, uint16_t size)
 {
-    if (HAL_I2C_Mem_Read(&hi2c1, BMP280_ADDRESS, reg, I2C_MEMADD_SIZE_8BIT,data, size,HAL_MAX_DELAY) == HAL_OK)
-    {
-        return BMP280_OK;
-    }
-    return BMP280_ERROR;
+	if(bsp_i2c_mem_read(reg,data,size,BMP280_ADDRESS)){
+		return BMP280_OK;
+	}
+	return BMP280_ERROR;
 }
 
 void BMP280_Delay(uint32_t ms)
 {
-    HAL_Delay(ms);
+    bsp_i2c_delay(ms);
 }

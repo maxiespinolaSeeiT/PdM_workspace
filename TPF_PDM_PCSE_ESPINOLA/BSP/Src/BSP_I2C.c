@@ -52,6 +52,13 @@ bool_t bsp_i2c_read(uint8_t *data, uint16_t size, uint16_t address){
 	return false;
 }
 
+bool_t bsp_i2c_mem_read(uint8_t reg, uint8_t *data, uint16_t size, uint16_t address){
+	if ((HAL_I2C_Mem_Read(&hi2c1, address, reg, I2C_MEMADD_SIZE_8BIT,data, size,HAL_MAX_DELAY) == HAL_OK)){
+		return true;
+		}
+	return false;
+}
+
 void bsp_i2c_delay(uint32_t ms){
 	HAL_Delay(ms);
 }
