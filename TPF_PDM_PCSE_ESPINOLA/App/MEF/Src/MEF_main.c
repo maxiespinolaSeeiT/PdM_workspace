@@ -160,14 +160,6 @@ void MEF_main_update() {
 					currentState = PROCESS_DATA; stateInit = true;
 				}
 
-
-        		//if (ATH_IsReady() && BMP280_IsReady()) {
-				//	currentState = PROCESS_DATA;
-				//	stateInit = true;
-				 //}
-
-        	   // stateInit = true;
-
             break;
 
         case PROCESS_DATA:
@@ -211,7 +203,7 @@ void MEF_main_update() {
                 	LCD_Clear();
                 	sprintf(buffer_lcd, "%.2f%cC%c", tempAmbient, 0xDF,'\0');
                 	LCD_SetCursor(0, 0);
-                	LCD_WriteString("Temp. Amb.");
+                	LCD_WriteString("Temp. Ambiente");
                 	LCD_SetCursor(1, 0);
                 	LCD_WriteString(buffer_lcd);
 				}
@@ -222,7 +214,7 @@ void MEF_main_update() {
 
 					LCD_Clear();
 					LCD_SetCursor(0, 0);
-					LCD_WriteString("Pres. Atm.");
+					LCD_WriteString("Pres.Atmosferica");
 					LCD_SetCursor(1, 0);
 					LCD_WriteString(buffer_lcd);
 				}
@@ -231,7 +223,7 @@ void MEF_main_update() {
 					uartSendString((uint8_t*)buffer_show);
 					LCD_Clear();
 					LCD_SetCursor(0, 0);
-					LCD_WriteString("Humedad Rel.");
+					LCD_WriteString("Humedad Relativa");
 					LCD_SetCursor(1, 0);
 					LCD_WriteString(buffer_lcd);
 				}
