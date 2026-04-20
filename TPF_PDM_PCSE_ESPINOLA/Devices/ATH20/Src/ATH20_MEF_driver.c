@@ -37,10 +37,10 @@ typedef enum {
 
 
 
-uint8_t cmdInit1[3] = {CMD_INIT, 0x08, 0x00}; //Comando INIT y bytes de configuracion interna segun datasheet
-uint8_t cmdMeasure1[3] = {CMD_MEASURE, 0x33, 0x00}; //Comando que dispara la medición
-uint32_t raw_hum1; //humedad sin procesar
-uint32_t raw_temp1; //temperatura sin procesar
+static uint8_t cmdInit1[3] = {CMD_INIT, 0x08, 0x00}; //Comando INIT y bytes de configuracion interna segun datasheet
+static uint8_t cmdMeasure1[3] = {CMD_MEASURE, 0x33, 0x00}; //Comando que dispara la medición
+static uint32_t raw_hum1; //humedad sin procesar
+static uint32_t raw_temp1; //temperatura sin procesar
 
 
 static ATH_State_t state = ATH_STATE_IDLE;

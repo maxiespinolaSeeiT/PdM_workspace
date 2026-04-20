@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-
+#include "API_GPIO.h"
 #include "API_uart.h"
 #include "API_cmdparser.h"
 #include "ATH20_MEF_driver.h"
@@ -25,11 +25,11 @@ static MEF_main_state_t currentState = INIT;
 static bool stateInit = true;
 static cmd_t lastCmd = CMD_NONE;
 
-cmd_t cmd = CMD_NONE;
+static cmd_t cmd = CMD_NONE;
 
-float t1, h1; //Temperatura y Humedad del ATH20
-float t2, p2; //Temperatura y Presion ATM del BMP280
-float tempAmbient=0.00f; //Variable para calcular el promedio entre las dos temperaturas del sensor
+static float t1, h1; //Temperatura y Humedad del ATH20
+static float t2, p2; //Temperatura y Presion ATM del BMP280
+static float tempAmbient=0.00f; //Variable para calcular el promedio entre las dos temperaturas del sensor
 
 static bool_t ath_ready = false;
 static bool_t bmp_ready = false;

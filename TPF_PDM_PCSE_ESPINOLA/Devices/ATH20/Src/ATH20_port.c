@@ -11,8 +11,6 @@
 #include "ATH20_port.h"
 #include "BSP_I2C.h"
 
-extern I2C_HandleTypeDef hi2c1; // Ajustar según tu configuración
-
 #define AHT20_ADDRESS (0x38 << 1) // Dirección I2C
 
 //Funcion para escribir en el puerto I2C, devuelve el estado del sensor, recibe el dato y el tamaño a escribir

@@ -5,11 +5,11 @@
  *      Author: Usuario
  */
 
-#include "../../../Devices/BMP280/Inc/BMP280_port.h"
+#include "BMP280_port.h"
 
-#include "../../../BSP/Inc/BSP_I2C.h"
+#include "BSP_I2C.h"
 
-extern I2C_HandleTypeDef hi2c1;
+
 
 #define BMP280_ADDRESS (0x77 << 1) //  Direccion del BMP280
 
