@@ -4,46 +4,38 @@
  * Máquina de Estados Principal
  *
  *  Created on: Apr 12, 2026
- *      Author: Maxmiliano Ariel Espinola
+ *      Author: Maximiliano Ariel Espinola
  */
-#include <MEF/Inc/MEF_main.h>
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "MEF_main.h"
 #include "API_GPIO.h"
 #include "API_uart.h"
 #include "API_cmdparser.h"
 #include "ATH20_MEF_driver.h"
 #include "BMP280_MEF_driver.h"
-
-#include "../../../BSP/Inc/BSP_I2C.h"
-
-
-
+#include "BSP_I2C.h"
 
 static MEF_main_state_t currentState = INIT;
 static bool stateInit = true;
 static cmd_t lastCmd = CMD_NONE;
-
 static cmd_t cmd = CMD_NONE;
-
 static float t1, h1; //Temperatura y Humedad del ATH20
 static float t2, p2; //Temperatura y Presion ATM del BMP280
 static float tempAmbient=0.00f; //Variable para calcular el promedio entre las dos temperaturas del sensor
-
 static bool_t ath_ready = false;
 static bool_t bmp_ready = false;
+static char buffer_show[32];
+static char buffer_lcd[16];
 
-
-char buffer_show[32];
-char buffer_lcd[16];
 void MEF_main_init() {
-
     uartInit();
     cmdParserInit();
     GPIO_init();
-
     HAL_Delay(50); //Para estabilizar el bus luego de reiniciar
+
     if(I2C_init()){
     	HAL_Delay(10);//Dar tiempo para la primer consulta de los perisféricos
     	LCD_Init();
@@ -55,16 +47,12 @@ void MEF_main_init() {
     	uartSendString((uint8_t*)"No se pudo inicializar el puerto I2C \r\n");
     	currentState = ERROR;
     }
-
-
 }
 
 void MEF_main_update() {
-
 	cmdPoll();
 	ATH_Update();
 	BMP280_Update();
-
 	switch (currentState) {
     case INIT:
 				if (stateInit) {

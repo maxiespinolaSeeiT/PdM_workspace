@@ -13,7 +13,7 @@
 
 #define AHT20_ADDRESS (0x38 << 1) // Dirección I2C
 
-//Funcion para escribir en el puerto I2C, devuelve el estado del sensor, recibe el dato y el tamaño a escribir
+
 ath_status_t ATH_I2C_Write(uint8_t *data, uint16_t size) {
 
 	if (bsp_i2c_write(data,size,AHT20_ADDRESS)) {

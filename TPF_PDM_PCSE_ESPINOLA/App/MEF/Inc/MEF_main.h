@@ -2,7 +2,7 @@
  * MEF_main.h
  *
  *  Created on: Apr 12, 2026
- *      Author: Usuario
+ *      Author: Maximiliano Ariel Espínola
  */
 
 #include "LCD_driver.h"

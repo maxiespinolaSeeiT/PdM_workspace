@@ -2,15 +2,13 @@
  * ATH20_MEF_driver.c
  *
  *  Created on: Apr 15, 2026
- *      Author: Usuario
+ *      Author: Maximiliano Ariel Espínola
  */
-#include "../../../Devices/ATH20/Inc/ATH20_MEF_driver.h"
-
-#include "stdint.h"
+#include <stdint.h>
+#include "ATH20_MEF_driver.h"
 #include "API_uart.h"
-#include "../../../Devices/ATH20/Inc/ATH20_port.h"
-
-#include "../../../BSP/Inc/BSP_I2C.h"
+#include "ATH20_port.h"
+#include "BSP_I2C.h"
 
 //Comandos del sensor
 #define CMD_INIT       0xBE // Inicializar
@@ -35,19 +33,13 @@ typedef enum {
     ATH_STATE_ERROR
 } ATH_State_t;
 
-
-
 static uint8_t cmdInit1[3] = {CMD_INIT, 0x08, 0x00}; //Comando INIT y bytes de configuracion interna segun datasheet
 static uint8_t cmdMeasure1[3] = {CMD_MEASURE, 0x33, 0x00}; //Comando que dispara la medición
 static uint32_t raw_hum1; //humedad sin procesar
 static uint32_t raw_temp1; //temperatura sin procesar
-
-
-static ATH_State_t state = ATH_STATE_IDLE;
-static uint32_t tick_start = 0;
-
-
-static uint32_t tick = 0;
+static ATH_State_t state = ATH_STATE_IDLE; //Estado de la MEF del sensor
+static uint32_t tick_start = 0;//Control de retardos no bloqueantes
+static uint32_t tick = 0;//Control de retardos no bloqueantes
 
 static bool_t initialized = false;
 
@@ -63,16 +55,16 @@ void ATH_Update(void)
 
         case ATH_STATE_INIT_SEND:
         	if(ATH_I2C_Write(cmdInit1, 3)==ATH_OK){
-        		tick = HAL_GetTick();
+        		tick = bsp_i2c_getTick();
         		state = ATH_STATE_INIT_WAIT;
         	}
             break;
 
         case ATH_STATE_INIT_WAIT:
-            if (HAL_GetTick() - tick >= 10) { // tiempo datasheet
+            if (bsp_i2c_getTick() - tick >= 10) { // tiempo recomendado en el datasheet
                 state = ATH_STATE_INIT_CHECK;
             }
-            if (HAL_GetTick() - tick > 200) {   // timeout
+            if (bsp_i2c_getTick() - tick > 200) {   // timeout
 				state = ATH_STATE_ERROR;
 			}
             break;
@@ -95,7 +87,7 @@ void ATH_Update(void)
 			if (!initialized) break;
 			if (ATH_I2C_Write(cmdMeasure1, 3) == ATH_OK)
 			{
-				tick_start = HAL_GetTick(); // guardo tiempo
+				tick_start = bsp_i2c_getTick();
 				state = ATH_STATE_WAIT;
 			}
 			else
@@ -108,11 +100,11 @@ void ATH_Update(void)
 
 
         case ATH_STATE_WAIT:
-            if ((HAL_GetTick() - tick_start) >= 80)
+            if ((bsp_i2c_getTick() - tick_start) >= 80)
             {
                 state = ATH_STATE_READ;
             }
-            if ((HAL_GetTick() - tick_start) > 500) //Timeout
+            if ((bsp_i2c_getTick() - tick_start) > 500) //Timeout
 			{
 				state = ATH_STATE_ERROR;
 			}
@@ -155,8 +147,6 @@ void ATH_Update(void)
             break;
 
         case ATH_STATE_ERROR:
-        	//SI da error queda detenida acá la MEF y la MEF_main envia un mensaje de controlar la conexion
-
             break;
     }
 }
@@ -171,7 +161,7 @@ void ATH_Start(void)
 }
 
 bool_t ATH_IsReady(void) {
-    return (state == ATH_STATE_DONE);  // solo consulta, no modifica el estado
+    return (state == ATH_STATE_DONE);
 }
 
 bool_t ATH_GetData(float *temp, float *hum)
@@ -202,7 +192,6 @@ bool_t ATH_Is_Init(void) {
 	}
 }
 
-//Lee el primer byte del sensor para ver el estado
 uint8_t ATH_ReadStatus(void)
 {
     uint8_t status = 0;

@@ -2,16 +2,13 @@
  * BMP280_port.c
  *
  *  Created on: Apr 11, 2026
- *      Author: Usuario
+ *      Author:  Maximiliano Ariel Espínola
  */
 
 #include "BMP280_port.h"
-
 #include "BSP_I2C.h"
 
-
-
-#define BMP280_ADDRESS (0x77 << 1) //  Direccion del BMP280
+#define BMP280_ADDRESS (0x77 << 1) //  Dirección del BMP280
 
 bmp280_status_t BMP280_WriteReg(uint8_t reg, uint8_t *data, uint16_t size)
 {

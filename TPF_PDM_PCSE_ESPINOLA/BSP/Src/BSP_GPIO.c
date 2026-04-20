@@ -2,9 +2,10 @@
  * BSP_GPIO.c
  *
  *  Created on: Apr 20, 2026
- *      Author: Usuario
+ *      Author: Maximiliano Ariel Espínola
  */
 #include "BSP_GPIO.h"
+#include "stm32f4xx_hal.h"
 
 void BSP_GPIO_Init(void)
 {

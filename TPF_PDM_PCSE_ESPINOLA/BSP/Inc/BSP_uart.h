@@ -4,16 +4,17 @@
  * Inicializa, envia y recibe datos de la USART2.
  *
  *  Created on: Apr 20, 2026
- *      Author: Espinola Maximiliano Ariel
+ *      Author: Maximiliano Ariel Espínola
  *
  *  Cuando hay un error se enciende el LD2 de la Nucleo-F446RE
  */
-#include "API_common_types.h"
+
 #ifndef INC_BSP_UART_H_
 #define INC_BSP_UART_H_
 
-#define UARTTIMEOUT 10
+#include "API_common_types.h"
 
+#define UARTTIMEOUT 10
 #define BAUDRATE_UART 115200
 
 //--------Public functions-----------------//

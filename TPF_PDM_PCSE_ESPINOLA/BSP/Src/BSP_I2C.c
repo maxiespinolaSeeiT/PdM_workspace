@@ -9,6 +9,8 @@
 
 I2C_HandleTypeDef hi2c1;
 
+static void Error_Handler_I2C(void);
+
 bool_t I2C_init(void)
 {
   hi2c1.Instance = I2C1;
@@ -22,7 +24,8 @@ bool_t I2C_init(void)
   hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
   if (HAL_I2C_Init(&hi2c1) != HAL_OK)
   {
-    Error_Handler();
+
+    Error_Handler_I2C();
     return false;
   }else{
 	  return true;
@@ -63,7 +66,11 @@ void bsp_i2c_delay(uint32_t ms){
 	HAL_Delay(ms);
 }
 
-void Error_Handler(void)
+uint32_t  bsp_i2c_getTick(void){
+	return HAL_GetTick();
+}
+
+static void Error_Handler_I2C(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */

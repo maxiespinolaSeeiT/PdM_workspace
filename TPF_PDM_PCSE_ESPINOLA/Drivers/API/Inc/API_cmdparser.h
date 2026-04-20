@@ -30,19 +30,10 @@ typedef enum {
 	CMD_BAUD
 } cmd_t;
 
-
-
-/*----------Funciones Públicas------------------*/
-
-void cmdParserInit(void);
-void cmdPoll(void);
-void cmdPrintHelp(void);
-cmd_t cmdParser_GetCommand(void);
-
-
-/*----------Funciones Privadas------------------*/
- //Imprime el menu en pantalla
-
-
+//--------Public functions-----------------//
+void cmdParserInit(void); //Inicial el cmdParser
+void cmdPoll(void); //Actualiza la MEF del cmdParser
+void cmdPrintHelp(void); //Imprime por UART la ayuda para manejar el sistema
+cmd_t cmdParser_GetCommand(void); //Getter del último comando recibido por UART
 
 #endif /* API_INC_API_CMDPARSER_H_ */

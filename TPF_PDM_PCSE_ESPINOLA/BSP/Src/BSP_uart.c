@@ -2,11 +2,12 @@
  * BSP_uart.c
  *
  *  Created on: Apr 19, 2026
- *      Author: Usuario
+ *      Author: Maximiliano Ariel Espínola
  */
 #include "BSP_uart.h"
 #include "API_GPIO.h"
 #include "API_uart.h"
+#include "stm32f4xx_hal.h"
 
 static UART_HandleTypeDef huart2;
 bool_t bsp_uart_init(uint32_t baudrate){

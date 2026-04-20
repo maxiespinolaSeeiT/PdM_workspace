@@ -19,7 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 
 #include "main.h"
-#include "MEF_main.h"
 
 
 /* Private includes ----------------------------------------------------------*/
@@ -45,9 +44,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-SPI_HandleTypeDef hspi1;
+//SPI_HandleTypeDef hspi1;
 
-UART_HandleTypeDef huart2;
+//UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
@@ -55,7 +54,7 @@ UART_HandleTypeDef huart2;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-
+void Error_Handler(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -109,8 +108,6 @@ int main(void)
   while (1)
   {
 	  MEF_main_update();
-
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -158,7 +155,16 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
-
+void Error_Handler(void)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1)
+  {
+  }
+  /* USER CODE END Error_Handler_Debug */
+}
 /**
   * @brief I2C1 Initialization Function
   * @param None

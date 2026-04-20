@@ -19,28 +19,20 @@ typedef enum {
 	CMD_ERROR
 } parserMEF_t;
 
+//---------Funciones Privadas-----------------//
 static void cmdPrintMenu(void);
-
-extern bool_t flag;
-static cmd_t currentCmd = CMD_NONE; //Variable para enviar el estado actual recibido por la UART
-
-static void cmdProcessLine(void);
-static void strToUpper(char *str);
-
-static uint8_t cmdBuffer[CMD_MAX_LINE];
+static void cmdProcessLine(void); //Procesa el buffer recibido por la UART
+static void strToUpper(char *str);//Pasa todo el buffer a MAYUSCULAS para hacerlo caseINsensitive
 static uint16_t cmdIndex = 0;
+static uint8_t cmdBuffer[CMD_MAX_LINE];
 static uint8_t caracterRecibido; //variable para ir guardando los caracteres que recibo
-static char *tokens[CMD_MAX_TOKENS];
 static uint8_t tokenCount = 0;
 static char *token;
-
-
-
+static char *tokens[CMD_MAX_TOKENS];
+static cmd_t currentCmd = CMD_NONE; //Variable para pasar el comando recibido por la UART
 static parserMEF_t state;
 
-
 void cmdParserInit(){
-	//uartInit(); //inicio la UART
 	state = CMD_IDLE; //Inicio la entrada de la MEF en CMD_IDLE
 }
 
@@ -59,8 +51,8 @@ void cmdPoll(void)
 
     	if (uartReceiveByte(&caracterRecibido)) {
     		//me fijo si hay algo en el buffer
-    		uartSendStringSize(&caracterRecibido, 1); // eco para ver lo que escribo
-    		if (caracterRecibido == '\r' || caracterRecibido == '\n') //me fijo si no es un final de linea
+    		uartSendStringSize(&caracterRecibido, 1); // eco para ver lo que escribo por la consola
+    		if (caracterRecibido == '\r' || caracterRecibido == '\n') //detecto final de linea o retorno de carro para procesar el buffer
     		{
     			if (cmdIndex > 0) { // evita líneas vacías, si pongo ENTER y el index esta en 0 no procesa
     				state = CMD_PROCESS;
@@ -68,20 +60,20 @@ void cmdPoll(void)
     		}
     		else
     		{
-				if (cmdIndex >= CMD_MAX_LINE - 1) //me fijo si no hay overflow
+				if (cmdIndex >= CMD_MAX_LINE - 1) //Control de overflow
 				{
 					state = CMD_ERROR;
 				}
 				else
 				{
-					cmdBuffer[cmdIndex++] = caracterRecibido; //voy armando el buffer con cada caracter
+					cmdBuffer[cmdIndex++] = caracterRecibido;
 				}
 			}
     	}
         break;
 
     case CMD_PROCESS:
-    	cmdProcessLine(); //proceso la linea
+    	cmdProcessLine();
     	state=CMD_EXEC;
         break;
 
@@ -118,15 +110,12 @@ void cmdPrintHelp(){
 }
 
 static void cmdPrintMenu(void){
-
 	uartSendString((uint8_t*)"\r\n");
 	uartSendString((uint8_t*)"==================================================\r\n");
 	uartSendString((uint8_t*)"            ESTACIÓN METEOROLÓGICA\r\n");
 	uartSendString((uint8_t*)"=================================================\r\n");
-
 	uartSendString((uint8_t*)"\r\n Comandos disponibles:\r\n");
 	uartSendString((uint8_t*)"--------------------------------------------------\r\n");
-
 	uartSendString((uint8_t*)" TEMP?  -> Ver temperatura actual [°C]\r\n");
 	uartSendString((uint8_t*)" PRES?  -> Ver presión [hPa]\r\n");
 	uartSendString((uint8_t*)" HUM?   -> Ver humedad relativa [%]\r\n");
@@ -134,44 +123,30 @@ static void cmdPrintMenu(void){
 	uartSendString((uint8_t*)" MENU   -> Mostrar este menú\r\n");
 	uartSendString((uint8_t*)" REBOOT -> Reinicia el sistema\r\n");
 	uartSendString((uint8_t*)" BAUD?  -> Muestra la configuración de la UART\r\n");
-
 	uartSendString((uint8_t*)"--------------------------------------------------\r\n");
-
-
 	uartSendString((uint8_t*)"\r\n");
 	uartSendString((uint8_t*)"Escriba un comando y presione ENTER: \r\n");
 }
 
-
-
-
-
-
 static void cmdProcessLine(void)
 {
     cmdBuffer[cmdIndex] = '\0'; // pongo '\0' para cerrar el string
-    //saltea espacios iniciales
 
-    // ignora los comentarios
     if (cmdBuffer[0] == '#' ||
        (cmdBuffer[0] == '/' && cmdBuffer[1] == '/')) {
         cmdIndex = 0;
         uartSendString((uint8_t*)"Comentario detectado\r\n");
         return;
     }
-
-    //paso todo a mayuscula
     strToUpper((char*)cmdBuffer);
 
-    //Hago los tokens con el buffer recibido
-
     tokenCount = 0;
-	token = strtok((char*)cmdBuffer, " "); //corta el string usando el espacio " "
+	token = strtok((char*)cmdBuffer, " "); //Armo los tokens para analizar el comando recibido
 
-	while (token != NULL && tokenCount < CMD_MAX_TOKENS) //verifico si hay palabras y que no se pase del limite
+	while (token != NULL && tokenCount < CMD_MAX_TOKENS)
 	{
-		tokens[tokenCount++] = token; //formio el array con los tokens
-		token = strtok(NULL, " "); //voy al siguiente token
+		tokens[tokenCount++] = token;
+		token = strtok(NULL, " ");
 	}
 
 	if (tokenCount == 0) return;
@@ -220,21 +195,17 @@ static void cmdProcessLine(void)
 		currentCmd = CMD_RESTART;
 		return;
 	}
-	//Comando para reiniciar despues de error de HW
+	//Comando para imprimir información de la configuracion de la UART
 	if (strcmp(tokens[0], "BAUD?") == 0)
 	{
 		bsp_uart_print_cfg();
 		currentCmd = CMD_BAUD;
 		return;
 	}
-
-
 	// comando desconocido
 	uartSendString((uint8_t*)"ERROR: Comando desconocido\r\n");
 	uartSendString((uint8_t*)"Escriba MENU para ver los comandos disponible disponible\r\n");
-
-
-	cmdIndex = 0; // reset buffer
+	cmdIndex = 0;
 }
 
 //Funcion para hacer case-INsensitve la recepción del buffer

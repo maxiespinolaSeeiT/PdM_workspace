@@ -2,33 +2,20 @@
  * LCD_port.h
  *
  *  Created on: Apr 9, 2026
- *      Author: Usuario
+ *      Author: Maximiliano Ariel Espínola
  */
 
 #ifndef API_INC_LCD_PORT_H_
 #define API_INC_LCD_PORT_H_
 
 #include <stdint.h>
-#include <stdbool.h>
+//#include <stdbool.h>
 #include "stm32f4xx_hal.h"
-
-#include "BSP_I2C.h"
-
 
 #define ADDR_I2C_LCD_PCF8574T 0x27 //Configurar dirección I2C del módulo
 
-
-// Inicializa el puerto (I2C)
-void LCD_Port_Init(void);
-
-// Envía un byte al expansor (PCF8574)
-void LCD_Port_Write(uint8_t data);
-
-// Delay en ms
-void LCD_Port_Delay(uint32_t ms);
-
-void MX_I2C1_Init(void);
-
-void Error_Handler_LCDPort(void);
-
+//--------Public functions-----------------//
+void LCD_Port_Init(void);// Inicializa el puerto de comunicación del (I2C)
+void LCD_Port_Write(uint8_t data);// Envía un byte al expansor (PCF8574)
+void LCD_Port_Delay(uint32_t ms);// Delay en ms
 #endif /* API_INC_LCD_PORT_H_ */

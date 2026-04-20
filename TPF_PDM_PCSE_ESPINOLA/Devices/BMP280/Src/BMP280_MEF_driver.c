@@ -4,14 +4,13 @@
  *  Created on: Apr 11, 2026
  *      Author: Maximiliano Ariel Espínola
  */
-#include "../../../Devices/BMP280/Inc/BMP280_MEF_driver.h"
-
 #include "stdint.h"
-
-#include "../../../Devices/BMP280/Inc/BMP280_port.h"
+#include "BMP280_MEF_driver.h"
+#include "BMP280_port.h"
 #include "API_uart.h"
+#include "BSP_I2C.h"
 
-// Registros
+// Registros del sensor
 #define REG_CALIB  0x88
 #define REG_CTRL   0xF4
 #define REG_CONFIG 0xF5
@@ -36,7 +35,7 @@ typedef struct {
 } BMP280_Calib_t;
 
 static BMP280_Calib_t calib;
-//static int32_t t_fine;
+
 
 //Estados de la MEF BMP280
 typedef enum {
@@ -60,10 +59,8 @@ static float pressure, last_press;
 static bool_t data_ready = false;
 static bool_t initialized = false;
 
-
-
-
-//Toma los datos de calibración del sensor
+//Toma los datos de calibración del sensor que se encuentran en la memoria del sensor
+//cada semsor tiene su calibración
 bmp280_status_t BMP280_ReadCalibration(void)
 {
     uint8_t data[24];
@@ -92,16 +89,15 @@ bmp280_status_t BMP280_ReadCalibration(void)
 void BMP280_Update()
 {
     uint8_t status;
-
     switch (state)
     {
         case BMP_IDLE:
 
             break;
 
-        case BMP_INIT_CONFIG: // CONFIG
+        case BMP_INIT_CONFIG:
 		{
-			uint8_t ctrl = 0x24; //Modo SLEEP
+			uint8_t ctrl = 0x24; //SLEEP MODE
 			uint8_t cfg  = 0xA0;
 
 			if (BMP280_WriteReg(REG_CTRL, &ctrl, 1) != BMP280_OK) {
@@ -141,22 +137,22 @@ void BMP280_Update()
             	break;
             }
 
-            tick_start = HAL_GetTick();
+            tick_start = bsp_i2c_getTick();
             state = BMP_WAIT;
             break;
         }
 
         case BMP_WAIT:
-        	if (HAL_GetTick() - tick_start < 10)  // esperar al menos 10ms
+        	if (bsp_i2c_getTick() - tick_start < 10)
         	        break;
 
             BMP280_ReadReg(REG_STATUS, &status, 1);
 
-            if (!(status & 0x08)) // terminó medición
+            if (!(status & 0x08)) // FIN DE LA MEDICION
             {
                 state = BMP_READ;
             }
-            else if (HAL_GetTick() - tick_start > 100) // timeout
+            else if (bsp_i2c_getTick() - tick_start > 100) // timeout
             {
                 state = BMP_ERROR;
 
@@ -166,7 +162,7 @@ void BMP280_Update()
         case BMP_READ:
             if (BMP280_ReadReg(REG_DATA, data, 6) == BMP280_OK)
             {
-            	// Armo el ADC con los 20bits que me envia el sensor
+            		// Armo el ADC con los 20bits que me envia el sensor
             	    int32_t adc_P = (data[0] << 12) | (data[1] << 4) | (data[2] >> 4);
             	    int32_t adc_T = (data[3] << 12) | (data[4] << 4) | (data[5] >> 4);
 
@@ -243,7 +239,6 @@ bool_t BMP280_GetData(float *t, float *p)
     return false;
 }
 
-//Controla que el estado esté en BMP_IDLE y el sensor inicializado
 void BMP_Start(void)
 {
     if (state == BMP_IDLE && initialized)
@@ -256,15 +251,6 @@ void BMP_Init(){
 	initialized = false;
 	state = BMP_INIT_CONFIG;
 }
-
-/*
-bool_t BMP_Is_Init(void){
-    if(state == BMP_ERROR){ uartSendString((uint8_t*)"BMP_IS-Init BMP_ERROR \r\n");  return false;}
-    if(state == BMP_IDLE && !initialized) { uartSendString((uint8_t*)"BMP_IS-Init BMP_IDLE && !initialized \r\n");  return false;} // nunca se inicializó
-    // Si todavía está inicializando, no es error todavía
-	if (state == BMP_INIT_CONFIG || state == BMP_INIT_CALIB) return true; // pendiente, no error
-	return initialized;
-}*/
 
 bool_t BMP_Is_Init(void){
 if(state==BMP_ERROR){
