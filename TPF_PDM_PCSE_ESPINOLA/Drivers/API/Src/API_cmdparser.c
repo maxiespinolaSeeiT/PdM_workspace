@@ -9,6 +9,7 @@
 #include <MEF/Inc/MEF_main.h>
 #include "API_cmdparser.h"
 #include "API_uart.h"
+#include "BSP_uart.h"
 
 typedef enum {
 	CMD_IDLE,
@@ -117,12 +118,12 @@ void cmdPrintHelp(){
 static void cmdPrintMenu(void){
 
 	uartSendString((uint8_t*)"\r\n");
-	uartSendString((uint8_t*)"=====================================\r\n");
-	uartSendString((uint8_t*)"      ESTACIÓN METEOROLÓGICA\r\n");
-	uartSendString((uint8_t*)"=====================================\r\n");
+	uartSendString((uint8_t*)"==================================================\r\n");
+	uartSendString((uint8_t*)"            ESTACIÓN METEOROLÓGICA\r\n");
+	uartSendString((uint8_t*)"=================================================\r\n");
 
 	uartSendString((uint8_t*)"\r\n Comandos disponibles:\r\n");
-	uartSendString((uint8_t*)"-------------------------------------\r\n");
+	uartSendString((uint8_t*)"--------------------------------------------------\r\n");
 
 	uartSendString((uint8_t*)" TEMP?  -> Ver temperatura actual [°C]\r\n");
 	uartSendString((uint8_t*)" PRES?  -> Ver presión [hPa]\r\n");
@@ -130,8 +131,9 @@ static void cmdPrintMenu(void){
 	uartSendString((uint8_t*)" HELP?  -> Mostrar ayuda\r\n");
 	uartSendString((uint8_t*)" MENU   -> Mostrar este menú\r\n");
 	uartSendString((uint8_t*)" REBOOT -> Reinicia el sistema\r\n");
+	uartSendString((uint8_t*)" BAUD?  -> Muestra la configuración de la UART\r\n");
 
-	uartSendString((uint8_t*)"-------------------------------------\r\n");
+	uartSendString((uint8_t*)"--------------------------------------------------\r\n");
 
 
 	uartSendString((uint8_t*)"\r\n");
@@ -212,10 +214,18 @@ static void cmdProcessLine(void)
 		}
 	//Comando para reiniciar despues de error de HW
 	if (strcmp(tokens[0], "RESTART") == 0)
-		{
+	{
 		currentCmd = CMD_RESTART;
 		return;
-		}
+	}
+	//Comando para reiniciar despues de error de HW
+	if (strcmp(tokens[0], "BAUD?") == 0)
+	{
+		bsp_uart_print_cfg();
+		currentCmd = CMD_BAUD;
+		return;
+	}
+
 
 	// comando desconocido
 	uartSendString((uint8_t*)"ERROR: Comando desconocido\r\n");

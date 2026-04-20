@@ -86,21 +86,29 @@ void bsp_uart_print_cfg() //Imprime los valores de configuración de la UART hua
 {
     char buffer[100];
 
-    uartSendString((uint8_t*)"\r\nUART CONFIG:\r\n");
+    uartSendString((uint8_t*)"==================================================\r\n");
+	uartSendString((uint8_t*)"            CONFIGURACION DE LA UART\r\n");
+	uartSendString((uint8_t*)"==================================================\r\n");
 
-    sprintf(buffer, "Baudrate: %lu\r\n", huart2.Init.BaudRate);
+	uartSendString((uint8_t*)"--------------------------------------------------\r\n");
+
+    sprintf(buffer, "- Baudrate: %lu\r\n", huart2.Init.BaudRate);
     uartSendString((uint8_t*)buffer);
 
-    sprintf(buffer, "Paridad: %lu\r\n", huart2.Init.Parity);
+    sprintf(buffer, "- Paridad: %lu\r\n", huart2.Init.Parity);
     uartSendString((uint8_t*)buffer);
 
-    sprintf(buffer, "Modo: %lu\r\n", huart2.Init.Mode);
+    sprintf(buffer, "- Modo: %lu\r\n", huart2.Init.Mode);
     uartSendString((uint8_t*)buffer);
 
-    sprintf(buffer, "Bit de Parada: %lu\r\n", huart2.Init.StopBits);
+    sprintf(buffer, "- Bit de Parada: %lu\r\n", huart2.Init.StopBits);
     uartSendString((uint8_t*)buffer);
 
-    sprintf(buffer, "Control de Flujo: %lu\r\n", huart2.Init.HwFlowCtl);
+    sprintf(buffer, "- Control de Flujo: %lu\r\n", huart2.Init.HwFlowCtl);
     uartSendString((uint8_t*)buffer);
+
+    uartSendString((uint8_t*)"--------------------------------------------------\r\n");
+
+    uartSendString((uint8_t*)"Escriba MENU y presione ENTER para ver los comandos disponibles\r\n");
 
 }

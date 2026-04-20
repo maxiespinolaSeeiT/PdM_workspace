@@ -105,7 +105,7 @@ void MEF_main_update() {
         	}
 
         	cmd= cmdParser_GetCommand();
-        	if (cmd != CMD_NONE && cmd != CMD_MENU && cmd != CMD_HELP) {
+        	if (cmd != CMD_NONE && cmd != CMD_MENU && cmd != CMD_HELP && cmd != CMD_BAUD) {
         	    lastCmd = cmd;  // ← guardarlo antes de cambiar de estado
         	    currentState = READ_SENSOR;
         	    stateInit = true;
