@@ -27,12 +27,12 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f4xx_hal.h"
+
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "MEF_main.h"
-#include "../../BSP/Inc/BSP_I2C.h"
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -54,8 +54,7 @@ extern "C" {
 
 
 /* USER CODE BEGIN EFP */
-#define B1_Pin GPIO_PIN_13
-#define B1_GPIO_Port GPIOC
+
 
 /* USER CODE END EFP */
 

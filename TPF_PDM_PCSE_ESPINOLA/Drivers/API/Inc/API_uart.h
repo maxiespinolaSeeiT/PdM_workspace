@@ -14,9 +14,7 @@
 #include <stdio.h>
 #include "API_delay.h"
 
-#define LD2_Pin GPIO_PIN_5 //LED para indicar Error en la UART
-#define LD2_GPIO_Port GPIOA
-#define BAUDRATE_UART 115200
+
 
 bool_t uartInit();
 void uartSendString(uint8_t * pstring); //Envia un string de datos por la UART

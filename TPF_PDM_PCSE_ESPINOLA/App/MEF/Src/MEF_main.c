@@ -41,6 +41,7 @@ void MEF_main_init() {
 
     uartInit();
     cmdParserInit();
+    GPIO_init();
 
     HAL_Delay(50); //Para estabilizar el bus luego de reiniciar
     if(I2C_init()){
@@ -52,7 +53,7 @@ void MEF_main_init() {
     }else
     {
     	uartSendString((uint8_t*)"No se pudo inicializar el puerto I2C \r\n");
-    	currentState = ERROR_INIT;
+    	currentState = ERROR;
     }
 
 
@@ -78,14 +79,14 @@ void MEF_main_update() {
 			    // Esperar a que ambos sensores terminen su init (pueden tardar varios ciclos)
 			    if (!ATH_Is_Init() ) {
 			        uartSendString((uint8_t*)"Error init ATH20 en arranque\r\n");
-			        currentState = ERROR_INIT;
+			        currentState = ERROR_MAIN;
 			        stateInit = true;
 			        break;
 			    }
 
 			    if (!BMP_Is_Init()) {
 			        uartSendString((uint8_t*)"Error init BMP280 en arranque\r\n");
-			        currentState = ERROR_INIT;
+			        currentState = ERROR_MAIN;
 			        stateInit = true;
 			        break;
 			    }
@@ -134,7 +135,7 @@ void MEF_main_update() {
         			LCD_SetCursor(0, 0);
         			LCD_WriteString("ERROR ATH20");
 
-        			currentState=ERROR_INIT;
+        			currentState=ERROR_MAIN;
         			break;
         		}
         		if(!BMP_Is_Init()){
@@ -144,7 +145,7 @@ void MEF_main_update() {
 					LCD_SetCursor(0, 0);
 					LCD_WriteString("ERROR BMP280");
 
-					currentState=ERROR_INIT;
+					currentState=ERROR_MAIN;
 					break;
 				}
 
@@ -247,8 +248,9 @@ void MEF_main_update() {
         	MEF_main_init();
         	currentState = INIT;
         	break;
-        case ERROR_INIT:
-            ATH_Forced_Error();
+        case ERROR_MAIN:
+        	led_error_on();
+        	ATH_Forced_Error();
             BMP_Forced_Error();
 
             uartSendString((uint8_t*)"Error de hardware detectado\r\n");
@@ -274,11 +276,11 @@ void MEF_main_update() {
 
                 stateInit = true;
                 MEF_main_init();
-                currentState = INIT;
+                currentState = REBOOT;
             }
             break;
         default:
-            currentState = ERROR_INIT;
+            currentState = ERROR_MAIN;
             break;
     }
 }

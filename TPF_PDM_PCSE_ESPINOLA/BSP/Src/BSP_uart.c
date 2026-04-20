@@ -5,7 +5,9 @@
  *      Author: Usuario
  */
 #include "BSP_uart.h"
+#include "API_GPIO.h"
 #include "API_uart.h"
+
 static UART_HandleTypeDef huart2;
 bool_t bsp_uart_init(uint32_t baudrate){
 	huart2.Instance = USART2;
@@ -19,7 +21,7 @@ bool_t bsp_uart_init(uint32_t baudrate){
 	  if (HAL_UART_Init(&huart2) != HAL_OK)
 	  {
 		return false;
-		HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET); //LD2 de la Nucleo-F446RE indica ERROR
+		led_error_on();
 	  }
 
 	  return true;
@@ -29,14 +31,15 @@ bool_t bsp_uart_write(uint8_t *data, uint16_t size){
 	if ((HAL_UART_Transmit(&huart2, data, size, UARTTIMEOUT) == HAL_OK)){
 		return true;
 	}else{
-		HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+		led_error_on();
 		return false;
 	}
 }
 bool_t bsp_uart_read(uint8_t *data, uint16_t size, uint32_t timeout){
 	if((HAL_UART_Receive(&huart2, data, size, timeout))!=HAL_OK){
-		HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET); //se enciende el LD2 de la Nucleo-F446RE indicando error
+		led_error_on();
 	}
+	return true;
 }
 bool_t bsp_uart_read_byte(uint8_t *data){
 	if (HAL_UART_Receive(&huart2, data, 1, 0) == HAL_OK) {

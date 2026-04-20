@@ -14,6 +14,8 @@
 
 #define UARTTIMEOUT 10
 
+#define BAUDRATE_UART 115200
+
 //--------Public functions-----------------//
 bool_t bsp_uart_init(uint32_t baudrate);
 bool_t bsp_uart_write(uint8_t *data, uint16_t size);

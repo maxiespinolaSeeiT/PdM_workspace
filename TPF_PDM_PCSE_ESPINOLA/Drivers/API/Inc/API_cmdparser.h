@@ -41,7 +41,7 @@ cmd_t cmdParser_GetCommand(void);
 
 
 /*----------Funciones Privadas------------------*/
-static void cmdPrintMenu(void); //Imprime el menu en pantalla
+ //Imprime el menu en pantalla
 
 
 

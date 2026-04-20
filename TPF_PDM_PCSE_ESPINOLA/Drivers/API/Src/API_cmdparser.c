@@ -19,6 +19,8 @@ typedef enum {
 	CMD_ERROR
 } parserMEF_t;
 
+static void cmdPrintMenu(void);
+
 extern bool_t flag;
 static cmd_t currentCmd = CMD_NONE; //Variable para enviar el estado actual recibido por la UART
 
