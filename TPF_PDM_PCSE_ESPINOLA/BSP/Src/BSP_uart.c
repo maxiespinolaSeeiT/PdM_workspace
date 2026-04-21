@@ -10,6 +10,8 @@
 #include "stm32f4xx_hal.h"
 
 static UART_HandleTypeDef huart2;
+static uint8_t clear=0;
+static uint8_t limit = 64;
 bool_t bsp_uart_init(uint32_t baudrate){
 	huart2.Instance = USART2;
 	  huart2.Init.BaudRate = baudrate;
@@ -76,10 +78,8 @@ void bsp_uart_flush(void){
 	__HAL_UART_CLEAR_FEFLAG(&huart2);
 	__HAL_UART_CLEAR_PEFLAG(&huart2);
 
-	uint8_t clear;
 
-	// vaciar FIFO RX (si hay datos colgados)
-	while (HAL_UART_Receive(&huart2, &clear, 1, 0) == HAL_OK);
+	while (limit-- && HAL_UART_Receive(&huart2, &clear, 1, 0) == HAL_OK);
 }
 bool_t bsp_uart_tx_done(void){ //esperarEnvio()
 	while (__HAL_UART_GET_FLAG(&huart2, UART_FLAG_TC) == RESET);
