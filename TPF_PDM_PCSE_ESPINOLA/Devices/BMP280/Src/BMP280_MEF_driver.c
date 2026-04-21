@@ -229,6 +229,9 @@ bool_t BMP280_IsReady(void)
 
 bool_t BMP280_GetData(float *t, float *p)
 {
+	if (t == NULL || p == NULL) { return false; }
+	if (!data_ready)            { return false; }
+
     if (data_ready)
     {
         *t = last_temp;

@@ -98,6 +98,9 @@ void LCD_Clear(void)
 
 void LCD_SetCursor(uint8_t row, uint8_t col)
 {
+	if (row > 1)  { return; }
+	if (col > 15) { return; }
+
     uint8_t addr;
     addr = (row == 0) ? LCD_ROW0_ADDR : LCD_ROW1_ADDR;
     addr += col;
