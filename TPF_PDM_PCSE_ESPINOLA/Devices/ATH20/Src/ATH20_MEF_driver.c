@@ -16,7 +16,7 @@
 #define CMD_SOFTRESET  0xBA // Reset
 
 static uint8_t rx_buffer[7]; //Buffer para recibir los datos
-static uint8_t status; //Controla el estado leyendo el primer byte
+static uint8_t status; //Controla el estado del sensor leyendo el primer byte
 
 typedef enum {
     ATH_STATE_IDLE,
