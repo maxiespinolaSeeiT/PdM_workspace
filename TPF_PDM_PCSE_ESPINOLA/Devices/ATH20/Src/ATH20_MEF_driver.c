@@ -14,8 +14,12 @@
 #define CMD_INIT       0xBE // Inicializar
 #define CMD_MEASURE    0xAC // Medir
 #define CMD_SOFTRESET  0xBA // Reset
+#define CMD_CALIB_OK 0x08
 
-static uint8_t rx_buffer[7]; //Buffer para recibir los datos
+#define SIZE_RX_BUFFER 7 //Tamaño del buffer de recepción de datos
+#define CMD_SENSOR 3 //Tamaño del buffer para enviar comandos al sensor
+
+static uint8_t rx_buffer[SIZE_RX_BUFFER]; //Buffer para recibir los datos
 static uint8_t status; //Controla el estado del sensor leyendo el primer byte
 
 typedef enum {
@@ -33,8 +37,8 @@ typedef enum {
     ATH_STATE_ERROR
 } ATH_State_t;
 
-static uint8_t cmdInit1[3] = {CMD_INIT, 0x08, 0x00}; //Comando INIT y bytes de configuracion interna segun datasheet
-static uint8_t cmdMeasure1[3] = {CMD_MEASURE, 0x33, 0x00}; //Comando que dispara la medición
+static uint8_t cmdInit1[CMD_SENSOR] = {CMD_INIT, 0x08, 0x00}; //Comando INIT y bytes de configuracion interna segun datasheet
+static uint8_t cmdMeasure1[CMD_SENSOR] = {CMD_MEASURE, 0x33, 0x00}; //Comando que dispara la medición
 static uint32_t raw_hum1; //humedad sin procesar
 static uint32_t raw_temp1; //temperatura sin procesar
 static ATH_State_t state = ATH_STATE_IDLE; //Estado de la MEF del sensor
@@ -73,7 +77,7 @@ void ATH_Update(void)
         {
             status = ATH_ReadStatus();
 
-            if (status & 0x08) { // calibrado OK
+            if (status & CMD_CALIB_OK) { // calibrado OK
                 initialized = true;
                 state = ATH_STATE_IDLE;
             } else {
