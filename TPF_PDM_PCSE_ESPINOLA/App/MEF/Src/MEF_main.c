@@ -94,7 +94,12 @@ void MEF_main_update() {
         	}
 
         	cmd= cmdParser_GetCommand();
-        	if (cmd != CMD_NONE && cmd != CMD_MENU && cmd != CMD_HELP && cmd != CMD_BAUD) {
+        	if (cmd != CMD_NONE &&
+				cmd != CMD_MENU &&
+				cmd != CMD_HELP &&
+				cmd != CMD_BAUD &&
+				cmd != CMD_I2C_CFG) {
+
         	    lastCmd = cmd;  // ← guardarlo antes de cambiar de estado
         	    currentState = READ_SENSOR;
         	    stateInit = true;

@@ -10,6 +10,7 @@
 #include "API_cmdparser.h"
 #include "API_uart.h"
 #include "BSP_uart.h"
+#include "API_I2C.h"
 
 typedef enum {
 	CMD_IDLE,
@@ -123,6 +124,7 @@ static void cmdPrintMenu(void){
 	uartSendString((uint8_t*)" MENU   -> Mostrar este menú\r\n");
 	uartSendString((uint8_t*)" REBOOT -> Reinicia el sistema\r\n");
 	uartSendString((uint8_t*)" BAUD?  -> Muestra la configuración de la UART\r\n");
+	uartSendString((uint8_t*)" I2C?   -> Muestra la configuración del puerto I2C\r\n");
 	uartSendString((uint8_t*)"--------------------------------------------------\r\n");
 	uartSendString((uint8_t*)"\r\n");
 	uartSendString((uint8_t*)"Escriba un comando y presione ENTER: \r\n");
@@ -202,6 +204,16 @@ static void cmdProcessLine(void)
 		currentCmd = CMD_BAUD;
 		return;
 	}
+	//Comando para imprimir información de la configuracion del I2C
+	if (strcmp(tokens[0], "I2C?") == 0)
+	{
+		api_i2c_print_cfg();
+
+		currentCmd = CMD_I2C_CFG;
+		return;
+	}
+
+
 	// comando desconocido
 	uartSendString((uint8_t*)"ERROR: Comando desconocido\r\n");
 	uartSendString((uint8_t*)"Escriba MENU para ver los comandos disponible disponible\r\n");

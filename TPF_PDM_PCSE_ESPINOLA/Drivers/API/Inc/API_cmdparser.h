@@ -27,7 +27,8 @@ typedef enum {
     CMD_MENU,
 	CMD_REBOOT,
 	CMD_RESTART,
-	CMD_BAUD
+	CMD_BAUD,
+	CMD_I2C_CFG
 } cmd_t;
 
 //--------Public functions-----------------//

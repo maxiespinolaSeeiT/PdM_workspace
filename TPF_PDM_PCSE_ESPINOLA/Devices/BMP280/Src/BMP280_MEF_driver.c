@@ -206,7 +206,7 @@ void BMP280_Update()
             }
             else
             {
-                state = BMP_IDLE;
+                state = BMP_ERROR;
             }
             break;
 

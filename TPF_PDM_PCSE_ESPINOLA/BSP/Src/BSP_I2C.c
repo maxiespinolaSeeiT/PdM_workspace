@@ -5,9 +5,10 @@
  *      Author: Espínola Maximiliano Ariel
  */
 #include <BSP_I2C.h>
-#include "stm32f4xx_hal.h"
 
-static I2C_HandleTypeDef hi2c1;
+
+#define PORT_I2C hi2c1
+static I2C_HandleTypeDef PORT_I2C;
 
 static void Error_Handler_I2C(void);
 
@@ -68,6 +69,23 @@ void bsp_i2c_delay(uint32_t ms){
 
 uint32_t  bsp_i2c_getTick(void){
 	return HAL_GetTick();
+}
+
+//Getter del struct de configuración del I2C
+I2C_HandleTypeDef bsp_i2c_getConfig(){
+	return hi2c1;
+}
+
+bool_t bsp_i2c_isDeviceReady(I2C_HandleTypeDef *hi2c, uint16_t num_device)
+{
+    if (HAL_I2C_IsDeviceReady(hi2c, (num_device << 1), 3, 10) == HAL_OK)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 static void Error_Handler_I2C(void)

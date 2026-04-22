@@ -8,8 +8,10 @@
 #include "API_GPIO.h"
 #include "API_uart.h"
 #include "stm32f4xx_hal.h"
+//#include "BSP_I2C.h
 
 static UART_HandleTypeDef huart2;
+
 static uint8_t clear=0;
 static uint8_t limit = 64;
 bool_t bsp_uart_init(uint32_t baudrate){
@@ -116,3 +118,4 @@ void bsp_uart_print_cfg() //Imprime los valores de configuración de la UART hua
     uartSendString((uint8_t*)"Escriba MENU y presione ENTER para ver los comandos disponibles\r\n");
 
 }
+
