@@ -152,6 +152,9 @@ void ATH_Update(void)
 
         case ATH_STATE_ERROR:
             break;
+
+        default:
+        	break;
     }
 }
 

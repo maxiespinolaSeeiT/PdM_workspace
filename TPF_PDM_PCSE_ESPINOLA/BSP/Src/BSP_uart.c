@@ -102,7 +102,7 @@ void bsp_uart_print_cfg() //Imprime los valores de configuración de la UART hua
     sprintf(buffer, "- Paridad: %lu\r\n", huart2.Init.Parity);
     uartSendString((uint8_t*)buffer);
 
-    sprintf(buffer, "- Modo: %lu\r\n", huart2.Init.Mode);
+    sprintf(buffer, "- Modo: %lu (TX_RX = 0x0C = decimal 12)\r\n", huart2.Init.Mode);
     uartSendString((uint8_t*)buffer);
 
     sprintf(buffer, "- Bit de Parada: %lu\r\n", huart2.Init.StopBits);

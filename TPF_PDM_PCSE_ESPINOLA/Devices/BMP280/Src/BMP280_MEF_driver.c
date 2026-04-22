@@ -217,8 +217,11 @@ void BMP280_Update()
         case BMP_ERROR:
 
         	break;
-    }
 
+    	default:
+    		state=BMP_ERROR;
+    	break;
+    }
 
 }
 

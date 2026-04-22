@@ -7,7 +7,7 @@
 #include <BSP_I2C.h>
 #include "stm32f4xx_hal.h"
 
-I2C_HandleTypeDef hi2c1;
+static I2C_HandleTypeDef hi2c1;
 
 static void Error_Handler_I2C(void);
 

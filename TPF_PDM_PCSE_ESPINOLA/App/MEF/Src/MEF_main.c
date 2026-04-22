@@ -45,7 +45,7 @@ void MEF_main_init() {
     }else
     {
     	uartSendString((uint8_t*)"No se pudo inicializar el puerto I2C \r\n");
-    	currentState = ERROR;
+    	currentState = ERROR_MAIN;
     }
 }
 
@@ -162,7 +162,7 @@ void MEF_main_update() {
 												//de los dos sensores
 					currentState = SHOW_T_P_H;
 				}
-				sprintf(buffer_show, "Temperatura Ambiente: %.2f ºC \r\n", tempAmbient);
+				sprintf(buffer_show, "Temperatura Ambiente: %.2f C \r\n", tempAmbient);
 			}
 			if (lastCmd == CMD_PRES)
 			{
