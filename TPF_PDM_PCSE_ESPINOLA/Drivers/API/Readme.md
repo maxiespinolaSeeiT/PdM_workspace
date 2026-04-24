@@ -147,4 +147,4 @@ CMD_ERROR      → Manejo de errores
 
 ## 👨‍💻 Autor
 
-Ing Espínola Maximiliano Ariel
+Ing. Espínola Maximiliano Ariel
