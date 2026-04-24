@@ -6,12 +6,18 @@ Este directorio contiene el driver para el sensor de temperatura y humedad **AHT
 - Capa de abstracción de hardware (PORT)
 - Separación entre lógica y acceso a periféricos
 
----
-
-##Estructura
-
-<pre> ```plaintext AHT20/ ├── Inc/ │ ├── ATH20_MEF_driver.h # Interfaz del driver (lógica de control) │ └── ATH20_port.h # Interfaz de acceso al hardware (I2C) │ ├── Src/ │ ├── ATH20_MEF_driver.c # Implementación de la MEF del sensor │ └── ATH20_port.c # Implementación del acceso físico (I2C) │ └── README.md ``` </pre>
----
+```plaintext
+AHT20/
+├── Inc/
+│   ├── ATH20_MEF_driver.h   # Interfaz del driver (lógica de control)
+│   └── ATH20_port.h         # Interfaz de acceso al hardware (I2C)
+│
+├── Src/
+│   ├── ATH20_MEF_driver.c   # Implementación de la MEF del sensor
+│   └── ATH20_port.c         # Implementación del acceso físico (I2C)
+│
+└── README.md
+```
 
 ## Descripción de módulos
 
